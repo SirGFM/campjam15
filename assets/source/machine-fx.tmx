@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="5" height="4" tilewidth="8" tileheight="8" nextobjectid="1">
+ <tileset firstgid="1" name="atlas" tilewidth="8" tileheight="8">
+  <image source="../atlas.bmp" trans="ff00ff" width="256" height="256"/>
+  <tile id="128">
+   <animation>
+    <frame tileid="128" duration="100"/>
+    <frame tileid="129" duration="100"/>
+    <frame tileid="130" duration="100"/>
+    <frame tileid="131" duration="100"/>
+   </animation>
+  </tile>
+  <tile id="129">
+   <animation>
+    <frame tileid="129" duration="100"/>
+    <frame tileid="130" duration="100"/>
+    <frame tileid="131" duration="100"/>
+    <frame tileid="128" duration="100"/>
+   </animation>
+  </tile>
+  <tile id="130">
+   <animation>
+    <frame tileid="130" duration="100"/>
+    <frame tileid="131" duration="100"/>
+    <frame tileid="128" duration="100"/>
+    <frame tileid="129" duration="100"/>
+   </animation>
+  </tile>
+  <tile id="131">
+   <animation>
+    <frame tileid="131" duration="100"/>
+    <frame tileid="128" duration="100"/>
+    <frame tileid="129" duration="100"/>
+    <frame tileid="130" duration="100"/>
+   </animation>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="5" height="4">
+  <data encoding="base64" compression="zlib">
+   eJxrZGBgaKQiBgCnpwoV
+  </data>
+ </layer>
+</map>

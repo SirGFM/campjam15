@@ -30,3 +30,8 @@
 
 # Debug files
 *.dSYM/
+
+# Ignore all GIMP files
+*.xcf
+# Ignore binaries and stuff
+bin/
