@@ -92,6 +92,9 @@ int main(int argc, char *argv[]) {
     rv = gfm_initGameWindow(game.pCtx, VWIDTH, VHEIGHT, WND_WIDTH, WND_HEIGHT,
             0/*userCantResize*/);
     ASSERT_NR(rv == GFMRV_OK);
+    // Set the background color
+    rv = gfm_setBackground(game.pCtx, 0xff222034);
+    ASSERT_NR(rv == GFMRV_OK);
     
     // Load all assets
     // TODO push this into another thread and play an animation
