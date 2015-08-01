@@ -35,3 +35,5 @@
 *.xcf
 # Ignore binaries and stuff
 bin/
+# Ignore all swap files
+*.swp

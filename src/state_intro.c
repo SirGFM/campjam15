@@ -5,6 +5,7 @@
  * doc
  */
 #include <campjam15/gameCtx.h>
+#include <campjam15/player.h>
 
 #include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmTilemap.h>
@@ -41,8 +42,6 @@ static int pMachineFxAnim[] = {
 
 /** This state's context */
 struct stIntroCtx {
-    /** The player sprite */
-    gfmSprite *pPlayer;
     /** The evil doc sprite */
     gfmSprite *pDoc;
     /** Effect on top of the machine */
@@ -53,6 +52,8 @@ struct stIntroCtx {
     int delayOnComplete;
     /** Which state should be animated and drawn */
     introState state;
+    /** The player sprite */
+    player *pPl;
 };
 typedef struct stIntroCtx introCtx;
 
@@ -110,6 +111,10 @@ gfmRV intro_init(gameCtx *pGame) {
     rv = gfmText_init(pGame->common.pText, 0/*x*/, 24/*y*/, width / 8,
             4/*maxLines*/, 100/*delay*/, 0/*dontBindToWorld*/, pGame->pSset8x8,
             0/*firstTile*/);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Initialize the player
+    rv = player_init(&(pIntro->pPl), pGame, 36/*x*/, 162/*y*/);
     ASSERT_NR(rv == GFMRV_OK);
     
     pIntro->state = intro_begin;
@@ -187,7 +192,11 @@ gfmRV intro_update_begin(gameCtx *pGame) {
     rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/, width + 4,
         height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
     ASSERT_NR(rv == GFMRV_OK);
+    
     rv = gfmQuadtree_populateTilemap(pGame->common.pQt, pGame->common.pTMap);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv =  player_collide(pIntro->pPl, pGame);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
@@ -214,14 +223,18 @@ gfmRV intro_draw_begin(gameCtx *pGame) {
     // TODO Draw everything
     rv = gfmTilemap_draw(pGame->common.pTMap, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = player_draw(pIntro->pPl, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    
     rv = gfmTilemap_draw(pIntro->pMachineFx, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = gfmText_draw(pGame->common.pText, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
-    //rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
-    //ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
+    ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
 __ret:
