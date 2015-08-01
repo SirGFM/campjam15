@@ -6,9 +6,31 @@
  */
 #include <campjam15/gameCtx.h>
 
+#include <GFraMe/gfmSprite.h>
 #include <GFraMe/gfmTilemap.h>
 
 #include <string.h>
+
+/** Current state of the intro animation */
+enum enIntroState {
+    intro_begin = 0,
+    intro_flash,
+    intro_end,
+    intro_game,
+    intro_max
+};
+typedef enum enIntroState introState;
+
+/** All the texts that are shown before the actual game... (or whatever) */
+#define NUM_TEXTS 5
+char *pTexts[] = {
+    "MWAHAHAHA",
+    "THE ULTIMATE LIFE FORM IS ALMOST COMPLETE",
+    "THIS CYBER T-REX WILL BE ABLE TO TRAVEL BACK IN TIME AND WILL ALLOW ME TO "
+        "CONTROL ALL DINOSSAURS",
+    "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
+    "CYBER T-REX! ACTIVATE!"
+};
 
 /** Array with the tilemap animation */
 static int pMachineFxAnim[] = {
@@ -19,8 +41,18 @@ static int pMachineFxAnim[] = {
 
 /** This state's context */
 struct stIntroCtx {
+    /** The player sprite */
+    gfmSprite *pPlayer;
+    /** The evil doc sprite */
+    gfmSprite *pDoc;
     /** Effect on top of the machine */
     gfmTilemap *pMachineFx;
+    /** Current text being displayed */
+    int currentText;
+    /** For how long the text should be shown after completion */
+    int delayOnComplete;
+    /** Which state should be animated and drawn */
+    introState state;
 };
 typedef struct stIntroCtx introCtx;
 
@@ -32,6 +64,7 @@ typedef struct stIntroCtx introCtx;
  */
 gfmRV intro_init(gameCtx *pGame) {
     gfmRV rv;
+    int height, width;
     introCtx *pIntro;
     
     // Sanitize arguments
@@ -70,6 +103,17 @@ gfmRV intro_init(gameCtx *pGame) {
     rv = gfmTilemap_recacheAnimations(pIntro->pMachineFx);
     ASSERT_NR(rv == GFMRV_OK);
     
+    // Get the camera's dimensions (to limit the text's dimensions)
+    rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Prepare the text
+    rv = gfmText_init(pGame->common.pText, 0/*x*/, 24/*y*/, width / 8,
+            4/*maxLines*/, 100/*delay*/, 0/*dontBindToWorld*/, pGame->pSset8x8,
+            0/*firstTile*/);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    pIntro->state = intro_begin;
+    
     rv = GFMRV_OK;
 __ret:
     return rv;
@@ -81,7 +125,7 @@ __ret:
  * @param  pGame The game's context
  * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
-gfmRV intro_update(gameCtx *pGame) {
+gfmRV intro_update_begin(gameCtx *pGame) {
     gfmRV rv;
     int height, width;
     introCtx *pIntro;
@@ -93,6 +137,47 @@ gfmRV intro_update(gameCtx *pGame) {
     pIntro = (introCtx*)(pGame->pState);
     
     // TODO Update everything
+    
+    // If the previous text finished playing, start the next
+    rv = gfmText_didFinish(pGame->common.pText);
+    ASSERT_NR(rv == GFMRV_TRUE || rv == GFMRV_FALSE);
+    if (rv == GFMRV_TRUE) {
+        // If the timer is out, update the text
+        if (pIntro->delayOnComplete <= 0) {
+            char *pText;
+            
+            if (pIntro->currentText >= NUM_TEXTS) {
+                // Go to the next state
+                pIntro->state++;
+            }
+            else {
+                // Get the current text
+                pText = pTexts[pIntro->currentText];
+                rv = gfmText_setText(pGame->common.pText, pText, strlen(pText),
+                        1/*doCopy*/);
+                ASSERT_NR(rv == GFMRV_OK);
+                // Update the timer
+                pIntro->delayOnComplete = 1500;
+
+                // Go to the next text
+                pIntro->currentText++;
+            }
+        }
+        else {
+            int elapsed;
+            
+            // Decrement the timer if it still hasn't finished
+            rv = gfm_getElapsedTime(&elapsed, pGame->pCtx);
+            ASSERT_NR(rv == GFMRV_OK);
+            
+            pIntro->delayOnComplete -= elapsed;
+        }
+    }
+    else {
+        rv = gfmText_update(pGame->common.pText, pGame->pCtx);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
     rv = gfmTilemap_update(pIntro->pMachineFx, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
@@ -116,7 +201,7 @@ __ret:
  * @param  pGame The game's context
  * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
-gfmRV intro_draw(gameCtx *pGame) {
+gfmRV intro_draw_begin(gameCtx *pGame) {
     gfmRV rv;
     introCtx *pIntro;
     
@@ -130,6 +215,9 @@ gfmRV intro_draw(gameCtx *pGame) {
     rv = gfmTilemap_draw(pGame->common.pTMap, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmTilemap_draw(pIntro->pMachineFx, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfmText_draw(pGame->common.pText, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     //rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
@@ -199,8 +287,13 @@ gfmRV intro(gameCtx *pGame) {
             ASSERT_NR(rv == GFMRV_OK);
             
             // Update everything
-            rv = intro_update(pGame);
-            ASSERT_NR(rv == GFMRV_OK);
+            switch (_intro.state) {
+                case intro_begin: {
+                    rv = intro_update_begin(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                }
+                default: break;
+            }
             
             rv = gfm_fpsCounterUpdateEnd(pGame->pCtx);
             ASSERT_NR(rv == GFMRV_OK);
@@ -211,8 +304,13 @@ gfmRV intro(gameCtx *pGame) {
             ASSERT_NR(rv == GFMRV_OK);
             
             // Draw everything
-            rv = intro_draw(pGame);
-            ASSERT_NR(rv == GFMRV_OK);
+            switch (_intro.state) {
+                case intro_begin: {
+                    rv = intro_draw_begin(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
+                default: break;
+            }
             
             rv = gfm_drawEnd(pGame->pCtx);
             ASSERT_NR(rv == GFMRV_OK);

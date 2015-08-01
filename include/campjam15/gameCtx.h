@@ -11,6 +11,7 @@
 #include <GFraMe/gfmError.h>
 #include <GFraMe/gfmQuadtree.h>
 #include <GFraMe/gfmSpriteset.h>
+#include <GFraMe/gfmText.h>
 #include <GFraMe/gfmTilemap.h>
 #include <GFraMe/gfmTypes.h>
 
@@ -33,6 +34,8 @@ typedef enum enGameState gameState;
 struct stGameCommon {
     /** The game's quadtree */
     gfmQuadtreeRoot *pQt;
+    /** Global text */
+    gfmText *pText;
     /** The game's default background */
     gfmTilemap *pTMap;
 };

@@ -112,6 +112,8 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmTilemap_getNew(&(game.common.pTMap));
     ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmText_getNew(&(game.common.pText));
+    ASSERT_NR(rv == GFMRV_OK);
     
     // Initalize the FPS counter (will only work on DEBUG mode)
     rv = gfm_initFPSCounter(game.pCtx, game.pSset8x8, 0/*firstTile*/);
@@ -143,6 +145,7 @@ __ret:
     // initialized)
     gfmQuadtree_free(&(game.common.pQt));
     gfmTilemap_free(&(game.common.pTMap));
+    gfmText_free(&(game.common.pText));
     // Make sure everything is cleaned, even on error
     gfm_free(&(game.pCtx));
     
