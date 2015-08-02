@@ -67,7 +67,7 @@ gfmRV player_init(player **ppPl, gameCtx *pGame, int x, int y) {
     rv = gfmSprite_getNew(&(pPl->pSpr));
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmSprite_init(pPl->pSpr, x, y, 14/*width*/, 26/*height*/,
-            pGame->pSset32x32, -8/*offX*/, -5/*offY*/, 0/*child*/, PLAYER);
+            pGame->pSset32x32, -8/*offX*/, -5/*offY*/, pPl/*child*/, PLAYER);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Add every animation

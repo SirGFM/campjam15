@@ -4,6 +4,7 @@
  * Intro state; Plays a little animation and then start the battle againts the
  * doc
  */
+#include <campjam15/collision.h>
 #include <campjam15/doc.h>
 #include <campjam15/gameCtx.h>
 #include <campjam15/player.h>
@@ -234,8 +235,16 @@ gfmRV intro_update_game(gameCtx *pGame) {
         rv =  player_collide(pIntro->pPl, pGame);
         ASSERT_NR(rv == GFMRV_OK);
         // Collides the doc against the world
-        rv =  doc_collide(pIntro->pDoc, pGame);
+        rv = doc_collide(pIntro->pDoc, pGame);
         ASSERT_NR(rv == GFMRV_OK);
+        // Collide the bullet against the world
+        rv = gfmQuadtree_collideSprite(pGame->common.pQt, pIntro->pBullet);
+        ASSERT_NR(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE);
+        // If a collision was detected, handle it and continue the operation
+        if (rv == GFMRV_QUADTREE_OVERLAPED) {
+            rv = collide(pGame->common.pQt);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
     } while (0);
     
     rv = GFMRV_OK;

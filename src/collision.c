@@ -15,16 +15,34 @@
 #include <GFraMe/gfmTypes.h>
 
 /**
- * Collide a player against the world
+ * Collide an object against the world
  */
-gfmRV collidePlayerWorld(gfmObject *pPplObj, gfmObject *pWorld) {
+gfmRV collideObjectWorld(gfmObject *pObj, gfmObject *pWorld) {
     gfmRV rv;
     
     // Collide it horizontally and vertically
-    rv = gfmObject_separateHorizontal(pPplObj, pWorld);
+    rv = gfmObject_separateHorizontal(pObj, pWorld);
     ASSERT_NR(rv == GFMRV_OK || rv == GFMRV_COLLISION_NOT_TRIGGERED);
-    rv = gfmObject_separateVertical(pPplObj, pWorld);
+    rv = gfmObject_separateVertical(pObj, pWorld);
     ASSERT_NR(rv == GFMRV_OK || rv == GFMRV_COLLISION_NOT_TRIGGERED);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Collide the bullet against the doc
+ */
+gfmRV collideBulletDoc(gfmObject *pBul, doc *pDoc) {
+    gfmRV rv;
+    
+    // Explode the bullet (no particles, sorry =[ )
+    rv = gfmObject_setPosition(pBul, 1000, 0);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Try to hit the doc
+    rv = doc_hit(pDoc);
+    ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
 __ret:
@@ -65,12 +83,28 @@ gfmRV collide(gfmQuadtreeRoot *pRoot) {
             ASSERT_NR(rv == GFMRV_OK);
         }
         
-        if      (type1 == COLLIDEABLE && type2 == PLAYER)
-            rv = collidePlayerWorld(pObj2/*pl*/, pObj1/*world*/);
-        else if (type2 == COLLIDEABLE && type1 == PLAYER)
-            rv = collidePlayerWorld(pObj1/*pl*/, pObj2/*world*/);
-        else
-            rv = GFMRV_FUNCTION_FAILED;
+        if (type1 == COLLIDEABLE && type2 == PLAYER) {
+            rv = collideObjectWorld(pObj2/*pl*/, pObj1/*world*/);
+        }
+        else if (type2 == COLLIDEABLE && type1 == PLAYER) {
+            rv = collideObjectWorld(pObj1/*pl*/, pObj2/*world*/);
+        }
+        if (type1 == COLLIDEABLE && type2 == DOC) {
+            rv = collideObjectWorld(pObj2/*doc*/, pObj1/*world*/);
+        }
+        else if (type2 == COLLIDEABLE && type1 == DOC) {
+            rv = collideObjectWorld(pObj1/*doc*/, pObj2/*world*/);
+        }
+        else if (type1 == BULLET && type2 == DOC) {
+            rv = collideBulletDoc(pObj1/*bullet*/, (doc*)pChild2);
+        }
+        else if (type2 == BULLET && type1 == DOC) {
+            rv = collideBulletDoc(pObj2/*bullet*/, (doc*)pChild1);
+        }
+        else {
+            // Whatever!
+            rv = GFMRV_OK;
+        }
         ASSERT_NR(rv == GFMRV_OK);
         
         rv = gfmQuadtree_continue(pRoot);

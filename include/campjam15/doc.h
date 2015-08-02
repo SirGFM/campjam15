@@ -19,9 +19,9 @@ typedef struct stDoc doc;
 enum enDocAnim {
     DOC_STAND,
     DOC_WALK,
-    DOC_HIT,
     DOC_SHIELD,
     DOC_SPAWN,
+    DOC_HIT,
     DOC_SHOOT,
     DOC_MAX
 };
@@ -69,6 +69,11 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame);
  * @return      ...
  */
 gfmRV doc_draw(doc *pDoc, gameCtx *pGame);
+
+/**
+ * Try to hit the doc
+ */
+gfmRV doc_hit(doc *pDoc);
 
 #endif /* __DOC_H__ */
 
