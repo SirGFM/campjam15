@@ -39,6 +39,15 @@ static int pMachineFxAnim[] = {
     4 , 16,  1 ,128,129,130,131,
     0
 };
+/** Array with a flash animation, done with tilemaps */
+static int pFlashFxAnim[] = {
+/* len,fps,loop,frames...*/
+    16 , 30,  0 ,170,169,168,167,166,165,164,163,162,161,160,192,193,194,195,
+                 196,
+    2  , 8 ,  0 ,196,197,
+    5  , 30,  0 ,197,198,199,200,201,
+    0
+};
 
 /** This state's context */
 struct stIntroCtx {
@@ -46,6 +55,8 @@ struct stIntroCtx {
     gfmSprite *pDoc;
     /** Effect on top of the machine */
     gfmTilemap *pMachineFx;
+    /** Effect that 'flashes' the screen */
+    gfmTilemap *pFlashFx;
     /** Current text being displayed */
     int currentText;
     /** For how long the text should be shown after completion */
@@ -74,10 +85,6 @@ gfmRV intro_init(gameCtx *pGame) {
     // Get the current state
     pIntro = (introCtx*)(pGame->pState);
     
-    // Alloc the fx tilemap
-    rv = gfmTilemap_getNew(&(pIntro->pMachineFx));
-    ASSERT_NR(rv == GFMRV_OK);
-    
     // Initialize the background
     rv = gfmTilemap_init(pGame->common.pTMap, pGame->pSset8x8, 1/*width*/,
         1/*height*/, -1/*defTile*/);
@@ -87,6 +94,9 @@ gfmRV intro_init(gameCtx *pGame) {
             7/*filenameLen*/, pDictNames, pDictTypes, dictLen);
     ASSERT_NR(rv == GFMRV_OK);
     
+    // Alloc the fx tilemap
+    rv = gfmTilemap_getNew(&(pIntro->pMachineFx));
+    ASSERT_NR(rv == GFMRV_OK);
     // Initialize and load the fx
     rv = gfmTilemap_init(pIntro->pMachineFx, pGame->pSset8x8, 5/*width*/,
         4/*height*/, -1/*defTile*/);
@@ -102,6 +112,23 @@ gfmRV intro_init(gameCtx *pGame) {
             sizeof(pMachineFxAnim) / sizeof(int) - 1);
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmTilemap_recacheAnimations(pIntro->pMachineFx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Alloc the fx tilemap
+    rv = gfmTilemap_getNew(&(pIntro->pFlashFx));
+    ASSERT_NR(rv == GFMRV_OK);
+    // Initialize and load the flash fx
+    rv = gfmTilemap_init(pIntro->pFlashFx, pGame->pSset8x8, 40/*width*/,
+        30/*height*/, -1/*defTile*/);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmTilemap_loadf(pIntro->pFlashFx, pGame->pCtx, "flash-fx.gfm",
+            14/*filenameLen*/, pDictNames, pDictTypes, dictLen);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Add the tilemap animations
+    rv = gfmTilemap_addAnimations(pIntro->pFlashFx, pFlashFxAnim,
+            sizeof(pFlashFxAnim) / sizeof(int) - 1);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmTilemap_recacheAnimations(pIntro->pFlashFx);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Get the camera's dimensions (to limit the text's dimensions)
@@ -130,9 +157,33 @@ __ret:
  * @param  pGame The game's context
  * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
+gfmRV intro_update_flash(gameCtx *pGame) {
+    gfmRV rv;
+    introCtx *pIntro;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    // Get the current state
+    pIntro = (introCtx*)(pGame->pState);
+    
+    rv = gfmTilemap_update(pIntro->pFlashFx, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Update the state
+ * 
+ * @param  pGame The game's context
+ * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
+ */
 gfmRV intro_update_begin(gameCtx *pGame) {
     gfmRV rv;
-    int height, width;
+//    int height, width;
     introCtx *pIntro;
     
     // Sanitize arguments
@@ -154,6 +205,9 @@ gfmRV intro_update_begin(gameCtx *pGame) {
             if (pIntro->currentText >= NUM_TEXTS) {
                 // Go to the next state
                 pIntro->state++;
+                // Make the t-rex a cyber t-rex
+                rv = player_play(pIntro->pPl, PL_STAND);
+                ASSERT_NR(rv == GFMRV_OK);
             }
             else {
                 // Get the current text
@@ -166,6 +220,12 @@ gfmRV intro_update_begin(gameCtx *pGame) {
 
                 // Go to the next text
                 pIntro->currentText++;
+                
+                // Awake the player during the doc's monologue
+                if (pIntro->currentText == 3) {
+                    rv = player_play(pIntro->pPl, PL_NORM_STAND);
+                    ASSERT_NR(rv == GFMRV_OK);
+                }
             }
         }
         else {
@@ -187,16 +247,47 @@ gfmRV intro_update_begin(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // TODO Collide everything
-    rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
-    ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/, width + 4,
-        height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
+//    rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+//    ASSERT_NR(rv == GFMRV_OK);
+//    rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/, width + 4,
+//        height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
+//    ASSERT_NR(rv == GFMRV_OK);
+//    
+//    rv = gfmQuadtree_populateTilemap(pGame->common.pQt, pGame->common.pTMap);
+//    ASSERT_NR(rv == GFMRV_OK);
+//    
+//    rv =  player_collide(pIntro->pPl, pGame);
+//    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Draw the state
+ * 
+ * @param  pGame The game's context
+ * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
+ */
+gfmRV intro_draw_flash(gameCtx *pGame) {
+    gfmRV rv;
+    introCtx *pIntro;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    // Get the current state
+    pIntro = (introCtx*)(pGame->pState);
+    
+    // TODO Draw everything
+    rv = gfmTilemap_draw(pGame->common.pTMap, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
-    rv = gfmQuadtree_populateTilemap(pGame->common.pQt, pGame->common.pTMap);
+    rv = player_draw(pIntro->pPl, pGame);
     ASSERT_NR(rv == GFMRV_OK);
     
-    rv =  player_collide(pIntro->pPl, pGame);
+    rv = gfmTilemap_draw(pIntro->pFlashFx, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
@@ -233,8 +324,8 @@ gfmRV intro_draw_begin(gameCtx *pGame) {
     rv = gfmText_draw(pGame->common.pText, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
-    rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
-    ASSERT_NR(rv == GFMRV_OK);
+    //rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
+    //ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
 __ret:
@@ -258,8 +349,9 @@ gfmRV intro_clean(gameCtx *pGame) {
     pIntro = (introCtx*)(pGame->pState);
     
     // Free the tilemap
-    rv = gfmTilemap_free(&(pIntro->pMachineFx));
-    ASSERT_NR(rv == GFMRV_OK);
+    gfmTilemap_free(&(pIntro->pFlashFx));
+    gfmTilemap_free(&(pIntro->pMachineFx));
+    player_free(pIntro->pPl);
     
     rv = GFMRV_OK;
 __ret:
@@ -304,7 +396,11 @@ gfmRV intro(gameCtx *pGame) {
                 case intro_begin: {
                     rv = intro_update_begin(pGame);
                     ASSERT_NR(rv == GFMRV_OK);
-                }
+                } break;
+                case intro_flash: {
+                    rv = intro_update_flash(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
                 default: break;
             }
             
@@ -320,6 +416,10 @@ gfmRV intro(gameCtx *pGame) {
             switch (_intro.state) {
                 case intro_begin: {
                     rv = intro_draw_begin(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
+                case intro_flash: {
+                    rv = intro_draw_flash(pGame);
                     ASSERT_NR(rv == GFMRV_OK);
                 } break;
                 default: break;

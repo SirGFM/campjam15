@@ -64,9 +64,14 @@
    <terrain name="collideable" tile="103"/>
   </terraintypes>
  </tileset>
- <layer name="Tile Layer 1" width="40" height="30">
+ <layer name="Tile Layer 1" width="40" height="30" visible="0">
   <data encoding="base64" compression="zlib">
-   eJzt1UkKwjAYhuFczVlBBY/gXMeNIPYAijO49La+oIFS4qamtcr3wkN+Gighi9YYpZRSSqnfail/7ZpztgKKKMXWsvFTE60EbF2s0cPmtfYx8HS+ORYJZJXO91lnXBLIogqqqOEem+toOJ7b2bZDB/vIesPKw/mGGGGMMDIHmGCKmWMviLwjze/L1jzvxOWAI05v9ts59+3/l6TrAfkzxVo=
+   eJzt1UkKwjAYhuFczVlBBY/gXMeNIHoAxRlceltf0EAocdOmtYvvhYf8NFBCFq0xSimllFIqZGtJ5VFwthLKqMTWqglTG50EbH1sMcDuuw4xCnS+JVYJ5JXOl64b7gnkUQ11NPCKzU20PM/tbDuih5OzPrEJcL4xJphi78wRZphj4dmLnHdk+X05mM+d+JxxwfXHfrfg/v3/kmy9AUwZtCo=
+  </data>
+ </layer>
+ <layer name="Tile Layer 2" width="40" height="30">
+  <data encoding="base64" compression="zlib">
+   eJzt1kkKgDAUBNHc/xbO0yVV8EMjIgYkqUUX9NqHqDEl55xzzjn3Z3Pmlmvrsa2Ab8qYGkv6xg9TY0lfXH94mRpr+MLRP0yNNX3h6WRqJPjC1d6MJN9pa8RI85HvH/n5I7+/5O8f/fygn7/0/5cd77acOQ==
   </data>
  </layer>
 </map>

@@ -69,7 +69,7 @@ gfmRV player_init(player **ppPl, gameCtx *pGame, int x, int y) {
     rv = gfmSprite_addAnimations(pPl->pSpr, pPlAnimData, plAnimDataLen);
     ASSERT_NR(rv == GFMRV_OK);
     // Play the sleep animation
-    rv = gfmSprite_playAnimation(pPl->pSpr, SLEEP);
+    rv = gfmSprite_playAnimation(pPl->pSpr, PL_SLEEP);
     ASSERT_NR(rv == GFMRV_OK);
     
     *ppPl = pPl;
@@ -94,6 +94,28 @@ gfmRV player_free(player *pPl) {
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     
     free(pPl);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Make the player play an animation
+ * 
+ * @param  pPl        The player
+ * @param  playerAnim The animation
+ * @return            ...
+ */
+gfmRV player_play(player *pPl, playerAnim anim) {
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
+    ASSERT(anim < PL_MAX, GFMRV_ARGUMENTS_BAD);
+    
+    rv = gfmSprite_playAnimation(pPl->pSpr, anim);
+    ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
 __ret:

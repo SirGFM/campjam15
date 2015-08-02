@@ -17,14 +17,15 @@ typedef struct stPlayer player;
 #include <GFraMe/gfmError.h>
 
 enum enPlayerAnim {
-    SLEEP = 0,
-    DOWN,
-    NORM_STAND,
-    NORM_HAPPY,
-    STAND,
-    WALK,
-    SHOOT,
-    HIT
+    PL_SLEEP = 0,
+    PL_DOWN,
+    PL_NORM_STAND,
+    PL_NORM_HAPPY,
+    PL_STAND,
+    PL_WALK,
+    PL_SHOOT,
+    PL_HIT,
+    PL_MAX
 };
 typedef enum enPlayerAnim playerAnim;
 
@@ -46,6 +47,15 @@ gfmRV player_init(player **ppPl, gameCtx *pGame, int x, int y);
  * @return       ...
  */
 gfmRV player_free(player *pPl);
+
+/**
+ * Make the player play an animation
+ * 
+ * @param  pPl  The player
+ * @param  anim The animation
+ * @return      ...
+ */
+gfmRV player_play(player *pPl, playerAnim anim);
 
 /**
  * Collide the player against everything
