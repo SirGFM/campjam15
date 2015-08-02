@@ -4,6 +4,7 @@
  * Intro state; Plays a little animation and then start the battle againts the
  * doc
  */
+#include <campjam15/doc.h>
 #include <campjam15/gameCtx.h>
 #include <campjam15/player.h>
 
@@ -52,7 +53,7 @@ static int pFlashFxAnim[] = {
 /** This state's context */
 struct stIntroCtx {
     /** The evil doc sprite */
-    gfmSprite *pDoc;
+    doc *pDoc;
     /** Effect on top of the machine */
     gfmTilemap *pMachineFx;
     /** Effect that 'flashes' the screen */
@@ -143,6 +144,9 @@ gfmRV intro_init(gameCtx *pGame) {
     // Initialize the player
     rv = player_init(&(pIntro->pPl), pGame, 36/*x*/, 163/*y*/);
     ASSERT_NR(rv == GFMRV_OK);
+    // Initialize the doc
+    rv = doc_init(&(pIntro->pDoc), pGame, 145/*x*/, 186/*y*/);
+    ASSERT_NR(rv == GFMRV_OK);
     
     pIntro->state = intro_begin;
     
@@ -183,7 +187,6 @@ __ret:
  */
 gfmRV intro_update_begin(gameCtx *pGame) {
     gfmRV rv;
-//    int height, width;
     introCtx *pIntro;
     
     // Sanitize arguments
@@ -250,17 +253,25 @@ gfmRV intro_update_begin(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // TODO Collide everything
-//    rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
-//    ASSERT_NR(rv == GFMRV_OK);
-//    rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/, width + 4,
-//        height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
-//    ASSERT_NR(rv == GFMRV_OK);
-//    
-//    rv = gfmQuadtree_populateTilemap(pGame->common.pQt, pGame->common.pTMap);
-//    ASSERT_NR(rv == GFMRV_OK);
-//    
-//    rv =  player_collide(pIntro->pPl, pGame);
-//    ASSERT_NR(rv == GFMRV_OK);
+#if 0
+    do {
+        int height, width;
+
+        rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/, width + 4,
+                height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
+        ASSERT_NR(rv == GFMRV_OK);
+
+        rv = gfmQuadtree_populateTilemap(pGame->common.pQt, pGame->common.pTMap);
+        ASSERT_NR(rv == GFMRV_OK);
+
+        rv =  player_collide(pIntro->pPl, pGame);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv =  doc_collide(pIntro->pDoc, pGame);
+        ASSERT_NR(rv == GFMRV_OK);
+    } while (0);
+#endif
     
     rv = GFMRV_OK;
 __ret:
@@ -320,6 +331,8 @@ gfmRV intro_draw_begin(gameCtx *pGame) {
     
     rv = player_draw(pIntro->pPl, pGame);
     ASSERT_NR(rv == GFMRV_OK);
+    rv = doc_draw(pIntro->pDoc, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
     
     rv = gfmTilemap_draw(pIntro->pMachineFx, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
@@ -327,8 +340,10 @@ gfmRV intro_draw_begin(gameCtx *pGame) {
     rv = gfmText_draw(pGame->common.pText, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
-    //rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
-    //ASSERT_NR(rv == GFMRV_OK);
+#if 0
+    rv = gfmQuadtree_drawBounds(pGame->common.pQt, pGame->pCtx, 0/*colors*/);
+    ASSERT_NR(rv == GFMRV_OK);
+#endif
     
     rv = GFMRV_OK;
 __ret:
@@ -355,6 +370,7 @@ gfmRV intro_clean(gameCtx *pGame) {
     gfmTilemap_free(&(pIntro->pFlashFx));
     gfmTilemap_free(&(pIntro->pMachineFx));
     player_free(pIntro->pPl);
+    doc_free(pIntro->pDoc);
     
     rv = GFMRV_OK;
 __ret:

@@ -97,6 +97,7 @@ gfmRV player_free(player *pPl) {
     // Sanitize arguments
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     
+    gfmSprite_free(&(pPl->pSpr));
     free(pPl);
     
     rv = GFMRV_OK;

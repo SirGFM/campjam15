@@ -17,6 +17,7 @@ CC = gcc
 # Define every object required by compilation
 #==============================================================================
   OBJS =                             \
+          $(OBJDIR)/doc.o            \
           $(OBJDIR)/state_intro.o    \
           $(OBJDIR)/main.o           \
           $(OBJDIR)/player.o         

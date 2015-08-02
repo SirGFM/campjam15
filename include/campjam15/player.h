@@ -1,14 +1,14 @@
 /**
- * @file src/player.c
+ * @file src/player.h
  * 
  */
-#ifndef __PLAYERSTRUCT_H__
-#define __PLAYER_STRUCTH__
+#ifndef __PLAYER_STRUCT_H__
+#define __PLAYER_STRUCT_H__
 
 /** The player's struct */
 typedef struct stPlayer player;
 
-#endif /* __PLAYER_STRUCTH__ */
+#endif /* __PLAYER_STRUCT_H__ */
 
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
