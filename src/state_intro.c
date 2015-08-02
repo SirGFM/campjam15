@@ -30,7 +30,7 @@ char *pTexts[] = {
     "THIS CYBER T-REX WILL BE ABLE TO TRAVEL BACK IN TIME AND WILL ALLOW ME TO "
         "CONTROL ALL DINOSSAURS",
     "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
-    "CYBER T-REX! ACTIVATE!"
+    "CYBER T-REX... ACTIVATE!"
 };
 
 /** Array with the tilemap animation */
@@ -141,7 +141,7 @@ gfmRV intro_init(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // Initialize the player
-    rv = player_init(&(pIntro->pPl), pGame, 36/*x*/, 162/*y*/);
+    rv = player_init(&(pIntro->pPl), pGame, 36/*x*/, 163/*y*/);
     ASSERT_NR(rv == GFMRV_OK);
     
     pIntro->state = intro_begin;
@@ -244,6 +244,9 @@ gfmRV intro_update_begin(gameCtx *pGame) {
     }
     
     rv = gfmTilemap_update(pIntro->pMachineFx, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = player_updateWave(pIntro->pPl, pGame);
     ASSERT_NR(rv == GFMRV_OK);
     
     // TODO Collide everything

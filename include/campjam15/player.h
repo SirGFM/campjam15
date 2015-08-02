@@ -66,6 +66,14 @@ gfmRV player_play(player *pPl, playerAnim anim);
 gfmRV player_collide(player *pPl, gameCtx *pGame);
 
 /**
+ * Makes the player wave vertically
+ * 
+ * @param  pPl The player
+ * @return     ...
+ */
+gfmRV player_updateWave(player *pPl, gameCtx *pGame);
+
+/**
  * Draw the player
  * 
  * @param  pPl The player

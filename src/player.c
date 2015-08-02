@@ -72,6 +72,10 @@ gfmRV player_init(player **ppPl, gameCtx *pGame, int x, int y) {
     rv = gfmSprite_playAnimation(pPl->pSpr, PL_SLEEP);
     ASSERT_NR(rv == GFMRV_OK);
     
+    // Set the acceleration
+    rv = gfmSprite_setVerticalAcceleration(pPl->pSpr, -500);
+    ASSERT_NR(rv == GFMRV_OK);
+    
     *ppPl = pPl;
     rv = GFMRV_OK;
 __ret:
@@ -136,6 +140,41 @@ gfmRV player_collide(player *pPl, gameCtx *pGame) {
     
     // TODO Actually collide the player
     rv = gfmQuadtree_populateSprite(pGame->common.pQt, pPl->pSpr);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Makes the player wave vertically
+ * 
+ * @param  pPl The player
+ * @return     ...
+ */
+gfmRV player_updateWave(player *pPl, gameCtx *pGame) {
+    gfmRV rv;
+    double vy;
+    
+    // Sanitize arguments
+    ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
+    
+    // Retrieve the vertical velocity and check if it should switch directions
+    rv = gfmSprite_getVerticalVelocity(&vy, pPl->pSpr);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    if (vy > 15.0) {
+        rv = gfmSprite_setVerticalAcceleration(pPl->pSpr, -30);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (vy < -15.0) {
+        rv = gfmSprite_setVerticalAcceleration(pPl->pSpr, 30);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    // Actually update the sprite
+    rv = gfmSprite_update(pPl->pSpr, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
