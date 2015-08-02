@@ -17,5 +17,10 @@
  */
 gfmRV intro(gameCtx *pGame);
 
+/**
+ * @return GFMRV_TRUE (if did shoot), GFMRV_FALSE (otherwise), ...
+ */
+gfmRV shoot_bullet(gameCtx *pGame, int x, int y);
+
 #endif /* __STATE_INTO_H__ */
 

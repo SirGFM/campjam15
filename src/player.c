@@ -5,10 +5,12 @@
 #include <campjam15/collision.h>
 #include <campjam15/gameCtx.h>
 #include <campjam15/player.h>
+#include <campjam15/state_intro.h>
 
 #include <GFraMe/gframe.h>
 #include <GFraMe/gfmAssert.h>
 #include <GFraMe/gfmError.h>
+#include <GFraMe/gfmInput.h>
 #include <GFraMe/gfmSprite.h>
 
 #include <stdlib.h>
@@ -21,15 +23,17 @@ int pPlAnimData[] = {
 /* NORM_STAND */ 1 , 0 ,  0 , 50,
 /* NORM_HAPPY */ 3 , 12,  1 , 50,50,51,
 /* STAND      */ 1 , 0 ,  0 , 52,
-/* WALK       */ 2 , 12,  1 , 53,54,
-/* SHOOT      */ 1 , 0 ,  0 , 55,
-/* HIT        */ 6 , 12,  0 , 56,57,56,57,
+/* WALK       */ 2 , 8 ,  1 , 53,54,
+/* SHOOT      */ 2 , 16,  0 , 55,56,
+/* HIT        */ 6 , 12,  0 , 57,58,57,58,
                  0
 };
 int plAnimDataLen = sizeof(pPlAnimData) / sizeof(int) - 1;
 
 struct stPlayer {
     gfmSprite *pSpr;
+    int timeShooting;
+    playerAnim anim;
 };
 
 /**
@@ -120,9 +124,17 @@ gfmRV player_play(player *pPl, playerAnim anim) {
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     ASSERT(anim < PL_MAX, GFMRV_ARGUMENTS_BAD);
     
+    // If we just shoot, make sure it finished playing
+    if (pPl->anim == PL_SHOOT) {
+        rv = gfmSprite_didAnimationFinish(pPl->pSpr);
+        ASSERT(rv == GFMRV_TRUE, GFMRV_OK);
+    }
+    
+    // Set the animation
     rv = gfmSprite_playAnimation(pPl->pSpr, anim);
     ASSERT_NR(rv == GFMRV_OK);
     
+    pPl->anim = anim;
     rv = GFMRV_OK;
 __ret:
     return rv;
@@ -197,12 +209,29 @@ __ret:
  * @return     ...
  */
 gfmRV player_update(player *pPl, gameCtx *pGame) {
+    double vx, vy;
     gfmCollision dir;
+    gfmInputState action, jump, left, right;
     gfmRV rv;
+    int nAction, nJump, nLeft, nRight;
+    int justShoot;
+    
+    // Set default values
+    justShoot = 0;
     
     // Sanitize arguments
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    
+    // Get all the key states
+    rv = gfm_getKeyState(&action, &nAction, pGame->pCtx, pGame->actionHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getKeyState(&jump, &nJump, pGame->pCtx, pGame->jumpHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getKeyState(&left, &nLeft, pGame->pCtx, pGame->leftHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getKeyState(&right, &nRight, pGame->pCtx, pGame->rightHnd);
+    ASSERT_NR(rv == GFMRV_OK);
     
     // Get the current status of the player (if it's touching anything)
     rv = gfmSprite_getCollision(&dir, pPl->pSpr);
@@ -213,7 +242,77 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     // Make sure it doesn't clip through the floor
     if ((dir & gfmCollision_down) == gfmCollision_down) {
-        rv = gfmSprite_setVerticalVelocity(pPl->pSpr, 32);
+        // If we are touching the ground and pressed jump, JUMP
+        if ((jump & gfmInput_justPressed) == gfmInput_justPressed) {
+            rv = gfmSprite_setVerticalVelocity(pPl->pSpr, -200);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        else {
+            rv = gfmSprite_setVerticalVelocity(pPl->pSpr, 32);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+    }
+    
+    // Horizontal movement...
+    if ((left & gfmInput_pressed) == gfmInput_pressed) {
+        rv = gfmSprite_setHorizontalVelocity(pPl->pSpr, -64);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if ((right & gfmInput_pressed) == gfmInput_pressed) {
+        rv = gfmSprite_setHorizontalVelocity(pPl->pSpr, 64);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else {
+        rv = gfmSprite_setHorizontalVelocity(pPl->pSpr, 0);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    // If the player just shot, and is still being pushed back
+    if (pPl->timeShooting > 0) {
+        int elapsed;
+        
+        // Update the timer
+        rv = gfm_getElapsedTime(&elapsed, pGame->pCtx);
+        ASSERT_NR(rv == GFMRV_OK);
+        pPl->timeShooting -= elapsed;
+        // Apply some force to the player
+        rv = gfmSprite_setHorizontalAcceleration(pPl->pSpr, -10000);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else {
+        rv = gfmSprite_setHorizontalAcceleration(pPl->pSpr, 0);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    // If the action button was pressed, try to shoot
+    if ((action & gfmInput_justPressed) == gfmInput_justPressed) {
+        int x, y;
+        
+        rv = gfmSprite_getPosition(&x, &y, pPl->pSpr);
+        ASSERT_NR(rv == GFMRV_OK);
+        // Try to shoot
+        rv = shoot_bullet(pGame, x, y+16);
+        if (rv == GFMRV_TRUE) {
+            // Force the player to be force back for 0.25s
+            pPl->timeShooting += 250;
+            justShoot = 1;
+        }
+    }
+    
+    // Update the animation
+    rv = gfmSprite_getVelocity(&vx, &vy, pPl->pSpr);
+    ASSERT_NR(rv == GFMRV_OK);
+    // TODO Check if hit
+    if (justShoot) {
+        rv = player_play(pPl, PL_SHOOT);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (vx == 0.0) {
+        rv = player_play(pPl, PL_STAND);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (vx != 0.0) {
+        rv = player_play(pPl, PL_WALK);
         ASSERT_NR(rv == GFMRV_OK);
     }
     

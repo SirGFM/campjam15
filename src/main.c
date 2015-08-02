@@ -62,6 +62,8 @@ static gfmRV loadAssets(gameCtx *pGame) {
     rv = gfm_createSpritesetCached(&(pGame->pSset8x8), pGame->pCtx, pGame->iTex,
             8/*tw*/, 8/*th*/);
     ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_createSpritesetCached(&(pGame->pSset16x16), pGame->pCtx,
+            pGame->iTex, 16/*tw*/, 16/*th*/);
     rv = gfm_createSpritesetCached(&(pGame->pSset32x32), pGame->pCtx,
             pGame->iTex, 32/*tw*/, 32/*th*/);
     ASSERT_NR(rv == GFMRV_OK);
@@ -101,10 +103,38 @@ int main(int argc, char *argv[]) {
     rv = loadAssets(&game);
     ASSERT_NR(rv == GFMRV_OK);
     
-    // TODO Add all virtual keys
-    // Add action (i.e., jump & select) key
-    //rv = gfm_addVirtualKey(&(game.actionHnd), game.pCtx);
-    //ASSERT_NR(rv == GFMRV_OK);
+    // Add all virtual keys
+    rv = gfm_addVirtualKey(&(game.actionHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.jumpHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.leftHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.rightHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Bind all inputs
+    rv = gfm_bindInput(game.pCtx, game.actionHnd, gfmKey_x);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_bindInput(game.pCtx, game.actionHnd, gfmKey_space);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfm_bindInput(game.pCtx, game.jumpHnd, gfmKey_z);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_bindInput(game.pCtx, game.jumpHnd, gfmKey_w);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_bindInput(game.pCtx, game.jumpHnd, gfmKey_up);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfm_bindInput(game.pCtx, game.leftHnd, gfmKey_a);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_bindInput(game.pCtx, game.leftHnd, gfmKey_left);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfm_bindInput(game.pCtx, game.rightHnd, gfmKey_d);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_bindInput(game.pCtx, game.rightHnd, gfmKey_right);
+    ASSERT_NR(rv == GFMRV_OK);
     
     // Alloc common stuff
     // TODO Alloc everything!!!

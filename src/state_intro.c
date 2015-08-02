@@ -25,11 +25,11 @@ enum enIntroState {
 typedef enum enIntroState introState;
 
 /** All the texts that are shown before the actual game... (or whatever) */
-/**
+/**/
 #define NUM_TEXTS 1
 char *pTexts[] = {
     "A",
-/**/
+/**
 #define NUM_TEXTS 5
 char *pTexts[] = {
     "MWAHAHAHA",
@@ -39,6 +39,10 @@ char *pTexts[] = {
     "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
     "CYBER T-REX... ACTIVATE!"
 /**/
+};
+
+static int pBulletAnimData[] = {
+    64,65
 };
 
 /** Array with the tilemap animation */
@@ -61,10 +65,14 @@ static int pFlashFxAnim[] = {
 struct stIntroCtx {
     /** The evil doc sprite */
     doc *pDoc;
+    /** The player's single bullet */
+    gfmSprite *pBullet;
     /** Effect on top of the machine */
     gfmTilemap *pMachineFx;
     /** Effect that 'flashes' the screen */
     gfmTilemap *pFlashFx;
+    /** Index of the bullet only animation */
+    int bulletAnimIndex;
     /** Current text being displayed */
     int currentText;
     /** For how long the text should be shown after completion */
@@ -157,6 +165,22 @@ gfmRV intro_init(gameCtx *pGame) {
     rv = doc_init(&(pIntro->pDoc), pGame, 145/*x*/, 186/*y*/);
     ASSERT_NR(rv == GFMRV_OK);
     
+    // Alloc and initialize the bullet
+    rv = gfmSprite_getNew(&(pIntro->pBullet));
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_init(pIntro->pBullet, 1000, -100, 14/*width*/, 8/*height*/,
+            pGame->pSset16x16, -1/*offX*/, -4/*offY*/, 0/*child*/, BULLET);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Stupid trick, add the animation twice so we can reset it
+    rv = gfmSprite_addAnimation(&(pIntro->bulletAnimIndex), pIntro->pBullet,
+            pBulletAnimData, 2, 16, 0);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_addAnimation(&(pIntro->bulletAnimIndex), pIntro->pBullet,
+            pBulletAnimData, 2, 16, 0);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_setHorizontalVelocity(pIntro->pBullet, 200);
+    ASSERT_NR(rv == GFMRV_OK);
+    
     pIntro->state = intro_begin;
     
     rv = GFMRV_OK;
@@ -185,6 +209,9 @@ gfmRV intro_update_game(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     // Update the doc
     rv = doc_update(pIntro->pDoc, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Update the bullet
+    rv = gfmSprite_update(pIntro->pBullet, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Collide everything
@@ -373,6 +400,8 @@ gfmRV intro_draw_game(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = doc_draw(pIntro->pDoc, pGame);
     ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_draw(pIntro->pBullet, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
     
     // TODO Draw the bullets and the enemies...
     
@@ -472,6 +501,7 @@ gfmRV intro_clean(gameCtx *pGame) {
     pIntro = (introCtx*)(pGame->pState);
     
     // Free the tilemap
+    gfmSprite_free(&(pIntro->pBullet));
     gfmTilemap_free(&(pIntro->pFlashFx));
     gfmTilemap_free(&(pIntro->pMachineFx));
     player_free(pIntro->pPl);
@@ -566,6 +596,44 @@ gfmRV intro(gameCtx *pGame) {
 __ret:
     intro_clean(pGame);
     
+    return rv;
+}
+
+/**
+ * @return GFMRV_TRUE (if did shoot), GFMRV_FALSE (otherwise), ...
+ */
+gfmRV shoot_bullet(gameCtx *pGame, int x, int y) {
+    gfmRV rv;
+    int bX, bY, height, width;
+    introCtx *pIntro;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    // Check that the current state is the intro state
+    ASSERT(pGame->state == state_intro, GFMRV_FUNCTION_FAILED);
+    
+    // Get the current state
+    pIntro = (introCtx*)(pGame->pState);
+    
+    // Check that the bullet isn't on screen
+    rv = gfmSprite_getPosition(&bX, &bY, pIntro->pBullet);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    ASSERT(bX < 0 || bX > width, GFMRV_FALSE);
+    
+    // Set the bullet's position
+    rv = gfmSprite_setPosition(pIntro->pBullet, x, y);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Restart the animation
+    rv = gfmSprite_playAnimation(pIntro->pBullet, pIntro->bulletAnimIndex-1);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_playAnimation(pIntro->pBullet, pIntro->bulletAnimIndex);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_TRUE;
+__ret:
     return rv;
 }
 

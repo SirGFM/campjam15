@@ -20,6 +20,7 @@
 #define BUTTON      gfmType_reserved_3
 #define PLAYER      gfmType_reserved_4
 #define DOC         gfmType_reserved_5
+#define BULLET      gfmType_reserved_6
 /** 'Export' all types */
 extern char *pDictNames[];
 extern int pDictTypes[];
@@ -53,6 +54,8 @@ struct stGameCtx {
     gfmCtx *pCtx;
     /** 8x8 spriteset */
     gfmSpriteset *pSset8x8;
+    /** 16x16 spriteset */
+    gfmSpriteset *pSset16x16;
     /** 32x32 spriteset */
     gfmSpriteset *pSset32x32;
     /** Flag to, programatically, force the game to quit; Differs from the
@@ -61,6 +64,14 @@ struct stGameCtx {
     int isRunning;
     /** Handle of the texture managed by the library */
     int iTex;
+    /** Handle for the 'action' key */
+    int actionHnd;
+    /** Handle for the 'jump' key */
+    int jumpHnd;
+    /** Handle for the 'left' key */
+    int leftHnd;
+    /** Handle for the 'right' key */
+    int rightHnd;
     /** Current state's context; It's set to NULL before changing the state */
     void *pState;
 };
