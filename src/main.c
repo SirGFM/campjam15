@@ -68,6 +68,14 @@ static gfmRV loadAssets(gameCtx *pGame) {
             pGame->iTex, 32/*tw*/, 32/*th*/);
     ASSERT_NR(rv == GFMRV_OK);
     
+    // Load the song (only in RELEASE)
+#ifndef DEBUG
+    rv = gfm_loadAudio(&(pGame->song), pGame->pCtx, "song.wav", 8);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_setRepeat(pGame->pCtx, pGame->song, 0);
+    ASSERT_NR(rv == GFMRV_OK);
+#endif
+    
     rv = GFMRV_OK;
 __ret:
     return rv;
@@ -97,6 +105,12 @@ int main(int argc, char *argv[]) {
     // Set the background color
     rv = gfm_setBackground(game.pCtx, 0xff222034);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    // Initialize the audio sub-system
+#ifndef DEBUG
+    rv = gfm_initAudio(game.pCtx, gfmAudio_defQuality);
+    ASSERT_NR(rv == GFMRV_OK);
+#endif
     
     // Load all assets
     // TODO push this into another thread and play an animation
@@ -146,6 +160,11 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmText_getNew(&(game.common.pText));
     ASSERT_NR(rv == GFMRV_OK);
+    
+#ifndef DEBUG
+    rv = gfm_playAudio(0, game.pCtx, game.song, 0.8);
+    ASSERT_NR(rv == GFMRV_OK);
+#endif
     
     // Initalize the FPS counter (will only work on DEBUG mode)
     rv = gfm_initFPSCounter(game.pCtx, game.pSset8x8, 0/*firstTile*/);
