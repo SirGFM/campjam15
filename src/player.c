@@ -37,6 +37,7 @@ struct stPlayer {
     int lives;
     int playHit;
     int playDeath;
+    int justGotHit;
 };
 
 /**
@@ -131,13 +132,17 @@ gfmRV player_play(player *pPl, playerAnim anim) {
     
     // If we just shoot, make sure it finished playing
     if (anim == PL_HIT) {
-        pPl->lives--;
-        
-        if (pPl->lives > 0) {
-            pPl->playHit = 1;
-        }
-        else {
-            pPl->playDeath = 1;
+        if (pPl->justGotHit == 0) {
+            pPl->lives--;
+            
+            if (pPl->lives > 0) {
+                pPl->playHit = 1;
+            }
+            else {
+                pPl->playDeath = 1;
+            }
+            
+            pPl->justGotHit = 1;
         }
     }
     else if (pPl->anim == PL_SHOOT) {
@@ -237,6 +242,19 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
     // Sanitize arguments
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    
+    // Make sure the player don't die in a hit
+    if (pPl->justGotHit) {
+        if (pPl->anim == PL_HIT) {
+            rv = gfmSprite_didAnimationFinish(pPl->pSpr);
+            if (rv == GFMRV_TRUE) {
+                pPl->justGotHit = 0;
+            }
+        }
+        else {
+            pPl->justGotHit = 0;
+        }
+    }
     
     if (pPl->playHit) {
 #ifndef DEBUG
