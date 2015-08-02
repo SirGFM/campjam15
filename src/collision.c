@@ -34,14 +34,23 @@ __ret:
 /**
  * Collide the bullet against the doc
  */
-gfmRV collideBulletDoc(gfmObject *pBul, doc *pDoc) {
+gfmRV collideBulletDoc(gfmSprite *pBul, doc *pDoc) {
     gfmRV rv;
     
-    // Explode the bullet (no particles, sorry =[ )
-    rv = gfmObject_setPosition(pBul, 1000, 0);
-    ASSERT_NR(rv == GFMRV_OK);
     // Try to hit the doc
-    rv = doc_hit(pDoc);
+    rv = doc_hit(pDoc, pBul);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+gfmRV collideBulletPlayer(gfmSprite *pBul, player *pPl) {
+    gfmRV rv;
+    
+    // Try to hit the doc
+    rv = player_hit(pPl, pBul);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
@@ -95,11 +104,17 @@ gfmRV collide(gfmQuadtreeRoot *pRoot) {
         else if (type2 == COLLIDEABLE && type1 == DOC) {
             rv = collideObjectWorld(pObj1/*doc*/, pObj2/*world*/);
         }
+        else if (type1 == BULLET && type2 == PLAYER) {
+            rv = collideBulletPlayer(pSpr1/*bullet*/, (player*)pChild2);
+        }
+        else if (type2 == BULLET && type1 == PLAYER) {
+            rv = collideBulletPlayer(pSpr2/*bullet*/, (player*)pChild1);
+        }
         else if (type1 == BULLET && type2 == DOC) {
-            rv = collideBulletDoc(pObj1/*bullet*/, (doc*)pChild2);
+            rv = collideBulletDoc(pSpr1/*bullet*/, (doc*)pChild2);
         }
         else if (type2 == BULLET && type1 == DOC) {
-            rv = collideBulletDoc(pObj2/*bullet*/, (doc*)pChild1);
+            rv = collideBulletDoc(pSpr2/*bullet*/, (doc*)pChild1);
         }
         else {
             // Whatever!

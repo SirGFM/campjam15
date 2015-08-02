@@ -73,7 +73,7 @@ gfmRV doc_draw(doc *pDoc, gameCtx *pGame);
 /**
  * Try to hit the doc
  */
-gfmRV doc_hit(doc *pDoc);
+gfmRV doc_hit(doc *pDoc, gfmSprite *pBul);
 
 gfmRV doc_play(doc *pDoc, docAnim anim);
 

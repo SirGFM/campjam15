@@ -89,5 +89,10 @@ gfmRV player_update(player *pPl, gameCtx *pGame);
  */
 gfmRV player_draw(player *pPl, gameCtx *pGame);
 
+/**
+ * Hit the player
+ */
+gfmRV player_hit(player *pPl, gfmSprite *pBul);
+
 #endif /* __PLAYER_H__ */
 

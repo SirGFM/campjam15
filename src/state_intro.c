@@ -43,8 +43,12 @@ char *pTexts[] = {
 };
 
 static int pBulletAnimData[] = {
-    64,65
+/* len,fps,loop,frames...*/
+    2 , 16, 0  ,64,65,
+    2 , 16, 0  ,64,66,
+    0
 };
+static int bulletAnimDataLen = sizeof(pBulletAnimData) / sizeof(int) - 1;
 
 /** Array with the tilemap animation */
 static int pMachineFxAnim[] = {
@@ -72,8 +76,6 @@ struct stIntroCtx {
     gfmTilemap *pMachineFx;
     /** Effect that 'flashes' the screen */
     gfmTilemap *pFlashFx;
-    /** Index of the bullet only animation */
-    int bulletAnimIndex;
     /** Current text being displayed */
     int currentText;
     /** For how long the text should be shown after completion */
@@ -173,13 +175,7 @@ gfmRV intro_init(gameCtx *pGame) {
             pGame->pSset16x16, -1/*offX*/, -4/*offY*/, 0/*child*/, BULLET);
     ASSERT_NR(rv == GFMRV_OK);
     // Stupid trick, add the animation twice so we can reset it
-    rv = gfmSprite_addAnimation(&(pIntro->bulletAnimIndex), pIntro->pBullet,
-            pBulletAnimData, 2, 16, 0);
-    ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmSprite_addAnimation(&(pIntro->bulletAnimIndex), pIntro->pBullet,
-            pBulletAnimData, 2, 16, 0);
-    ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmSprite_setHorizontalVelocity(pIntro->pBullet, 200);
+    rv = gfmSprite_addAnimations(pIntro->pBullet, pBulletAnimData, bulletAnimDataLen);
     ASSERT_NR(rv == GFMRV_OK);
     
     pIntro->state = intro_begin;
@@ -635,10 +631,13 @@ gfmRV shoot_bullet(gameCtx *pGame, int x, int y) {
     // Set the bullet's position
     rv = gfmSprite_setPosition(pIntro->pBullet, x, y);
     ASSERT_NR(rv == GFMRV_OK);
-    // Restart the animation
-    rv = gfmSprite_playAnimation(pIntro->pBullet, pIntro->bulletAnimIndex-1);
+    // Set it's velocity
+    rv = gfmSprite_setHorizontalVelocity(pIntro->pBullet, 200);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmSprite_playAnimation(pIntro->pBullet, pIntro->bulletAnimIndex);
+    // Restart the animation
+    rv = gfmSprite_playAnimation(pIntro->pBullet, 1);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_playAnimation(pIntro->pBullet, 0);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_TRUE;

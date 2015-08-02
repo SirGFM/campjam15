@@ -296,14 +296,27 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
             // Force the player to be force back for 0.25s
             pPl->timeShooting += 250;
             justShoot = 1;
+            
+            rv = gfmSprite_setVerticalVelocity(pPl->pSpr, 0);
+            ASSERT_NR(rv == GFMRV_OK);
         }
     }
     
     // Update the animation
     rv = gfmSprite_getVelocity(&vx, &vy, pPl->pSpr);
     ASSERT_NR(rv == GFMRV_OK);
-    // TODO Check if hit
-    if (justShoot) {
+    if (pPl->anim == PL_HIT) {
+        int x, y;
+        
+        // Do nothing if we were hit
+        rv = gfmSprite_setVelocity(pPl->pSpr, 0, 0);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfmSprite_getPosition(&x, &y, pPl->pSpr);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfmSprite_setPosition(pPl->pSpr, x, y + 2);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (justShoot) {
         rv = player_play(pPl, PL_SHOOT);
         ASSERT_NR(rv == GFMRV_OK);
     }
@@ -338,6 +351,23 @@ gfmRV player_draw(player *pPl, gameCtx *pGame) {
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     
     rv = gfmSprite_draw(pPl->pSpr, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Hit the player
+ */
+gfmRV player_hit(player *pPl, gfmSprite *pBul) {
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
+    
+    rv = player_play(pPl, PL_HIT);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;

@@ -5,6 +5,7 @@
 #include <campjam15/collision.h>
 #include <campjam15/doc.h>
 #include <campjam15/gameCtx.h>
+#include <campjam15/state_intro.h>
 
 #include <GFraMe/gframe.h>
 #include <GFraMe/gfmAssert.h>
@@ -207,6 +208,15 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
     rv = gfmSprite_getVelocity(&vx, &vy, pDoc->pSpr);
     ASSERT_NR(rv == GFMRV_OK);
     if (pDoc->anim == DOC_HIT) {
+        int x, y;
+        
+        // Do nothing if we were hit
+        rv = gfmSprite_setVelocity(pDoc->pSpr, 0, 0);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfmSprite_getPosition(&x, &y, pDoc->pSpr);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfmSprite_setPosition(pDoc->pSpr, x, y + 2);
+        ASSERT_NR(rv == GFMRV_OK);
     }
     else if (justShielded) {
         rv = doc_play(pDoc, DOC_SHIELD);
@@ -218,6 +228,10 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
             rv = doc_play(pDoc, DOC_STAND);
             ASSERT_NR(rv == GFMRV_OK);
         }
+        
+        // On this animation, force the player to stand still
+        rv = gfmSprite_setVelocity(pDoc->pSpr, 0, 0);
+        ASSERT_NR(rv == GFMRV_OK);
     }
     else if (vx == 0.0) {
         rv = doc_play(pDoc, DOC_STAND);
@@ -260,7 +274,7 @@ __ret:
 /**
  * Try to hit the doc
  */
-gfmRV doc_hit(doc *pDoc) {
+gfmRV doc_hit(doc *pDoc, gfmSprite *pBul) {
     gfmRV rv;
     
     // Sanitize arguments
@@ -274,7 +288,14 @@ gfmRV doc_hit(doc *pDoc) {
         ASSERT_NR(rv == GFMRV_OK);
         
         if (frame >= 36 && frame <= 39) {
-            // TODO Reflect the bullet!
+            // Reflect the bullet
+            rv = gfmSprite_setHorizontalVelocity(pBul, -200);
+            ASSERT_NR(rv == GFMRV_OK);
+            // Restart the animation
+            rv = gfmSprite_playAnimation(pBul, 0);
+            ASSERT_NR(rv == GFMRV_OK);
+            rv = gfmSprite_playAnimation(pBul, 1);
+            ASSERT_NR(rv == GFMRV_OK);
         }
         else {
             // We are hit!
