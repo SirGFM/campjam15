@@ -25,10 +25,11 @@ enum enIntroState {
 typedef enum enIntroState introState;
 
 /** All the texts that are shown before the actual game... (or whatever) */
+/**
 #define NUM_TEXTS 1
 char *pTexts[] = {
-    "ASD",
-/*
+    "A",
+/**/
 #define NUM_TEXTS 5
 char *pTexts[] = {
     "MWAHAHAHA",
@@ -37,7 +38,7 @@ char *pTexts[] = {
         "CONTROL ALL DINOSSAURS",
     "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
     "CYBER T-REX... ACTIVATE!"
-*/
+/**/
 };
 
 /** Array with the tilemap animation */
@@ -49,8 +50,8 @@ static int pMachineFxAnim[] = {
 /** Array with a flash animation, done with tilemaps */
 static int pFlashFxAnim[] = {
 /* len,fps,loop,frames...*/
-    16 , 30,  0 ,170,169,168,167,166,165,164,163,162,161,160,192,193,194,195,
-                 196,
+    18 , 30,  0 ,172,171,170,169,168,167,166,165,164,163,162,161,160,192,193,
+                 194,195,196,
     2  , 8 ,  0 ,196,197,
     5  , 30,  0 ,197,198,199,200,201,
     0
@@ -108,13 +109,13 @@ gfmRV intro_init(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     // Initialize and load the fx
     rv = gfmTilemap_init(pIntro->pMachineFx, pGame->pSset8x8, 5/*width*/,
-        4/*height*/, -1/*defTile*/);
+        9/*height*/, -1/*defTile*/);
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmTilemap_loadf(pIntro->pMachineFx, pGame->pCtx, "machine-fx.gfm",
             14/*filenameLen*/, pDictNames, pDictTypes, dictLen);
     ASSERT_NR(rv == GFMRV_OK);
     // Set its position
-    rv = gfmTilemap_setPosition(pIntro->pMachineFx, 24/*x*/, 160/*y*/);
+    rv = gfmTilemap_setPosition(pIntro->pMachineFx, 24/*x*/, 120/*y*/);
     ASSERT_NR(rv == GFMRV_OK);
     // Add the tilemap animations
     rv = gfmTilemap_addAnimations(pIntro->pMachineFx, pMachineFxAnim,
@@ -150,7 +151,7 @@ gfmRV intro_init(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // Initialize the player
-    rv = player_init(&(pIntro->pPl), pGame, 36/*x*/, 163/*y*/);
+    rv = player_init(&(pIntro->pPl), pGame, 36/*x*/, 150/*y*/);
     ASSERT_NR(rv == GFMRV_OK);
     // Initialize the doc
     rv = doc_init(&(pIntro->pDoc), pGame, 145/*x*/, 186/*y*/);
