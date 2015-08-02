@@ -1,0 +1,78 @@
+
+t180;
+
+// [bass]
+@2 o3 l8 q5
+
+>
+
+gg a+a+ <cc c+r>
+gg a+a+ <cc c+r>
+g a+ <c c+ d c+ c> a+
+g a+ <c c+ d c+ c> a+
+<c d+ f f+ g f+ f d+>
+<c d+ f f+ g f+ f d+>
+<ff r4 ff r4>
+r1
+<ff r4 ff r4>
+r4 <c+r cr> ar
+
+;
+
+@2 o3 l8 q5 v8 kt-15
+
+gg a+a+ <cc c+r>
+gg a+a+ <cc c+r>
+g a+ <c c+ d c+ c> a+
+g a+ <c c+ d c+ c> a+
+<c d+ f f+ g f+ f d+>
+<c d+ f f+ g f+ f d+>
+<ff r4 ff r4>
+r1
+<ff r4 ff r4>
+r4 <c+r cr> ar
+
+; // [/bass]
+
+// [percussion]
+
+#H=v4 g;
+#G=v3 g;
+#S=v4 b;
+#K=v4 <g>;
+#C=v6 na1 q6 g4 v4 na0 q1;
+
+#TABLE 0 { 128};
+#TABLE 1 { 60, 60, 56, 56, 52, 52, 48, 48, 44, 44, 40, 40, 36, 36, 32, 32, 28, 28, 24, 24 };
+
+// HiHat + Crash
+@1 q1 l16 na0
+
+HrHr rrHr HrHr rrrr
+HrHr rrHr HrHr rrrr
+HHHH rrHr HHHr rrrr
+HHHH rrHr HHHr rrrr
+rGGG rGGG rGGG rGGG
+rGGG rGGG rGGG rGGG
+C    rrrr C    rrrr
+rrrr rrrr rrrr rrrr
+C    rrrr C    rrrr
+rrrr rrrr rrrr rrrr
+
+;
+
+// Snare + Kick
+@1 q1 l16
+
+rrrr Krrr rrrr KrKr
+rrrr Krrr rrrr KrKr
+rrrr Krrr rrrr KrKr
+rrrr Krrr rrrr KrKr
+Krrr Krrr Krrr Krrr
+Krrr Krrr Krrr Krrr
+Grrr Grrr Grrr Grrr
+Grrr Grrr Grrr Grrr
+Grrr Grrr Grrr Grrr
+Grrr Grrr Grrr Grrr
+
+;// [percussion]
