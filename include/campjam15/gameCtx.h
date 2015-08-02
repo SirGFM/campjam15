@@ -82,7 +82,6 @@ struct stGameCtx {
     /** Handle for the 'right' key */
     int p2RightHnd;
     int resetHnd;
-    int ffHnd;
     /** Audio handles */
     int song;
     int barrier;

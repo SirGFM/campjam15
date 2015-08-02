@@ -99,9 +99,11 @@ __ret:
 int main(int argc, char *argv[]) {
     gameCtx game;
     gfmRV rv;
+    int jumpIntro;
     
     // Clean the game's context
     memset(&game, 0x0, sizeof(gameCtx));
+    jumpIntro = 0;
     
     // Initialize the library
     rv = gfm_getNew(&(game.pCtx));
@@ -127,9 +129,23 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
 #endif
     
-    if (argc > 1 && strcmp(argv[1], "full") == 0) {
-        rv = gfm_setFullscreen(game.pCtx);
-        ASSERT_NR(rv == GFMRV_OK);
+    if (argc > 1) {
+        if (strcmp(argv[1], "full") == 0) {
+            rv = gfm_setFullscreen(game.pCtx);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        else if (strcmp(argv[1], "skip") == 0) {
+            jumpIntro = 1;
+        }
+    }
+    if (argc > 2) {
+        if (strcmp(argv[2], "full") == 0) {
+            rv = gfm_setFullscreen(game.pCtx);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        else if (strcmp(argv[2], "skip") == 0) {
+            jumpIntro = 1;
+        }
     }
     
     // Load all assets
@@ -156,13 +172,9 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_addVirtualKey(&(game.resetHnd), game.pCtx);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_addVirtualKey(&(game.ffHnd), game.pCtx);
-    ASSERT_NR(rv == GFMRV_OK);
     
     // Bind all inputs
     rv = gfm_bindInput(game.pCtx, game.resetHnd, gfmKey_r);
-    ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.ffHnd, gfmKey_return);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = gfm_bindInput(game.pCtx, game.p1ActionHnd, gfmKey_space);
@@ -213,13 +225,14 @@ int main(int argc, char *argv[]) {
         // Make sure this is cleaned when we enter the next state
         game.pState = 0;
         switch (game.state) {
-            case state_intro: rv = intro(&game); break;
+            case state_intro: rv = intro(&game, jumpIntro); break;
             default: rv = GFMRV_INTERNAL_ERROR;
         }
         ASSERT_NR(rv == GFMRV_OK);
         
         if (game.state == state_reset) {
             game.state = state_intro;
+            jumpIntro = 1;
         }
     }
     

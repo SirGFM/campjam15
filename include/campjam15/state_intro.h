@@ -15,7 +15,7 @@
  * @param  gameCtx The game's context
  * @return         GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
-gfmRV intro(gameCtx *pGame);
+gfmRV intro(gameCtx *pGame, int jumpIntro);
 
 /**
  * @return GFMRV_TRUE (if did shoot), GFMRV_FALSE (otherwise), ...

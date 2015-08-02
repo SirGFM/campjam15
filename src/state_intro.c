@@ -26,11 +26,6 @@ enum enIntroState {
 typedef enum enIntroState introState;
 
 /** All the texts that are shown before the actual game... (or whatever) */
-/**/
-#define NUM_TEXTS 1
-char *pTexts[] = {
-    "A",
-/**
 #define NUM_TEXTS 5
 char *pTexts[] = {
     "MWAHAHAHA",
@@ -39,7 +34,6 @@ char *pTexts[] = {
         "CONTROL ALL DINOSSAURS",
     "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
     "CYBER T-REX... ACTIVATE!"
-/**/
 };
 
 static int pBulletAnimData[] = {
@@ -553,7 +547,7 @@ __ret:
  * @param  gameCtx The game's context
  * @return         GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
-gfmRV intro(gameCtx *pGame) {
+gfmRV intro(gameCtx *pGame, int jumpIntro) {
     gfmRV rv;
     introCtx _intro;
     
@@ -568,6 +562,10 @@ gfmRV intro(gameCtx *pGame) {
     // Initialize this state
     rv = intro_init(pGame);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    if (jumpIntro) {
+        _intro.state = intro_game;
+    }
     
     // Run until the window is closed (or the state changes)
     while (pGame->state == state_intro && pGame->isRunning
