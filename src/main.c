@@ -112,6 +112,11 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
 #endif
     
+    if (argc > 1 && strcmp(argv[1], "full") == 0) {
+        rv = gfm_setFullscreen(game.pCtx);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
     // Load all assets
     // TODO push this into another thread and play an animation
     rv = loadAssets(&game);
