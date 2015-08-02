@@ -2,6 +2,7 @@
  * @file src/player.c
  * 
  */
+#include <campjam15/collision.h>
 #include <campjam15/gameCtx.h>
 #include <campjam15/player.h>
 
@@ -139,9 +140,15 @@ gfmRV player_collide(player *pPl, gameCtx *pGame) {
     // Sanitize arguments
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     
-    // TODO Actually collide the player
-    rv = gfmQuadtree_populateSprite(pGame->common.pQt, pPl->pSpr);
-    ASSERT_NR(rv == GFMRV_OK);
+    // Actually collide the player
+    rv = gfmQuadtree_collideSprite(pGame->common.pQt, pPl->pSpr);
+    ASSERT_NR(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE);
+    
+    // If a collision was detected, handle it and continue the operation
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        rv = collide(pGame->common.pQt);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
     
     rv = GFMRV_OK;
 __ret:
@@ -181,6 +188,42 @@ gfmRV player_updateWave(player *pPl, gameCtx *pGame) {
     rv = GFMRV_OK;
 __ret:
     return rv;
+}
+
+/**
+ * Updates the player, allowing the player to control it
+ * 
+ * @param  pPl The player
+ * @return     ...
+ */
+gfmRV player_update(player *pPl, gameCtx *pGame) {
+    gfmCollision dir;
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    
+    // Get the current status of the player (if it's touching anything)
+    rv = gfmSprite_getCollision(&dir, pPl->pSpr);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Make it fall
+    rv = gfmSprite_setVerticalAcceleration(pPl->pSpr, 500);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Make sure it doesn't clip through the floor
+    if ((dir & gfmCollision_down) == gfmCollision_down) {
+        rv = gfmSprite_setVerticalVelocity(pPl->pSpr, 32);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    // Actually update the sprite
+    rv = gfmSprite_update(pPl->pSpr, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
+    return GFMRV_OK;
 }
 
 /**

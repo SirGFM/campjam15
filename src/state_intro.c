@@ -19,11 +19,16 @@ enum enIntroState {
     intro_flash,
     intro_end,
     intro_game,
+    intro_gameover,
     intro_max
 };
 typedef enum enIntroState introState;
 
 /** All the texts that are shown before the actual game... (or whatever) */
+#define NUM_TEXTS 1
+char *pTexts[] = {
+    "ASD",
+/*
 #define NUM_TEXTS 5
 char *pTexts[] = {
     "MWAHAHAHA",
@@ -32,6 +37,7 @@ char *pTexts[] = {
         "CONTROL ALL DINOSSAURS",
     "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
     "CYBER T-REX... ACTIVATE!"
+*/
 };
 
 /** Array with the tilemap animation */
@@ -62,6 +68,8 @@ struct stIntroCtx {
     int currentText;
     /** For how long the text should be shown after completion */
     int delayOnComplete;
+    /** For how long the 'flashing' animation has run */
+    int flashAnimTime;
     /** Which state should be animated and drawn */
     introState state;
     /** The player sprite */
@@ -161,8 +169,61 @@ __ret:
  * @param  pGame The game's context
  * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
+gfmRV intro_update_game(gameCtx *pGame) {
+    gfmRV rv;
+    introCtx *pIntro;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    // Get the current state
+    pIntro = (introCtx*)(pGame->pState);
+    
+    // Update the player
+    rv = player_update(pIntro->pPl, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Update the doc
+    rv = doc_update(pIntro->pDoc, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Collide everything
+    do {
+        int height, width;
+        
+        // Initialize the quadtree, making it a little bigger than the screen
+        rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/,
+                width + 4, height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
+        ASSERT_NR(rv == GFMRV_OK);
+        
+        // Populate the quadtree with the tilemap's hitboxes
+        rv = gfmQuadtree_populateTilemap(pGame->common.pQt,
+                pGame->common.pTMap);
+        ASSERT_NR(rv == GFMRV_OK);
+        
+        // Collides the player against the world
+        rv =  player_collide(pIntro->pPl, pGame);
+        ASSERT_NR(rv == GFMRV_OK);
+        // Collides the doc against the world
+        rv =  doc_collide(pIntro->pDoc, pGame);
+        ASSERT_NR(rv == GFMRV_OK);
+    } while (0);
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Update the state
+ * 
+ * @param  pGame The game's context
+ * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
+ */
 gfmRV intro_update_flash(gameCtx *pGame) {
     gfmRV rv;
+    int elapsed;
     introCtx *pIntro;
     
     // Sanitize arguments
@@ -173,6 +234,16 @@ gfmRV intro_update_flash(gameCtx *pGame) {
     
     rv = gfmTilemap_update(pIntro->pFlashFx, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    // Update this animation's time so we can move to the next one
+    rv = gfm_getElapsedTime(&elapsed, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    pIntro->flashAnimTime += elapsed;
+    // Change the state after 2 seconds
+    if (pIntro->flashAnimTime > 2000) {
+        // TODO Change to the last part of the animation
+        pIntro->state = intro_game;
+    }
     
     rv = GFMRV_OK;
 __ret:
@@ -284,6 +355,37 @@ __ret:
  * @param  pGame The game's context
  * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
+gfmRV intro_draw_game(gameCtx *pGame) {
+    gfmRV rv;
+    introCtx *pIntro;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    // Get the current state
+    pIntro = (introCtx*)(pGame->pState);
+    
+    rv = gfmTilemap_draw(pGame->common.pTMap, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = player_draw(pIntro->pPl, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = doc_draw(pIntro->pDoc, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // TODO Draw the bullets and the enemies...
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Draw the state
+ * 
+ * @param  pGame The game's context
+ * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
+ */
 gfmRV intro_draw_flash(gameCtx *pGame) {
     gfmRV rv;
     introCtx *pIntro;
@@ -299,6 +401,8 @@ gfmRV intro_draw_flash(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = player_draw(pIntro->pPl, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = doc_draw(pIntro->pDoc, pGame);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = gfmTilemap_draw(pIntro->pFlashFx, pGame->pCtx);
@@ -420,6 +524,10 @@ gfmRV intro(gameCtx *pGame) {
                     rv = intro_update_flash(pGame);
                     ASSERT_NR(rv == GFMRV_OK);
                 } break;
+                case intro_game: {
+                    rv = intro_update_game(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
                 default: break;
             }
             
@@ -439,6 +547,10 @@ gfmRV intro(gameCtx *pGame) {
                 } break;
                 case intro_flash: {
                     rv = intro_draw_flash(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
+                case intro_game: {
+                    rv = intro_draw_game(pGame);
                     ASSERT_NR(rv == GFMRV_OK);
                 } break;
                 default: break;

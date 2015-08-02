@@ -60,7 +60,7 @@ gfmRV doc_init(doc **ppDoc, gameCtx *pGame, int x, int y) {
     rv = gfmSprite_getNew(&(pDoc->pSpr));
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmSprite_init(pDoc->pSpr, x, y, 10/*width*/, 22/*height*/,
-            pGame->pSset32x32, -12/*offX*/, -8/*offY*/, 0/*child*/, PLAYER);
+            pGame->pSset32x32, -12/*offX*/, -8/*offY*/, 0/*child*/, DOC);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Add every animation
@@ -71,7 +71,7 @@ gfmRV doc_init(doc **ppDoc, gameCtx *pGame, int x, int y) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // Set the acceleration
-    rv = gfmSprite_setVerticalAcceleration(pDoc->pSpr, -500);
+    rv = gfmSprite_setVerticalAcceleration(pDoc->pSpr, 500);
     ASSERT_NR(rv == GFMRV_OK);
     
     *ppDoc = pDoc;
@@ -125,12 +125,14 @@ __ret:
 }
 
 /**
- * Makes the doc wave vertically
+ * Updates the doc's AI
  * 
  * @param  pDoc The doc
  * @return      ...
  */
-gfmRV doc_update(doc *pDoc, gameCtx *pGame);
+gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
+    return GFMRV_OK;
+}
 
 /**
  * Draw the doc

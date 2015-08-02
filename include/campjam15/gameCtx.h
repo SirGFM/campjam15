@@ -19,6 +19,7 @@
 #define COLLIDEABLE gfmType_reserved_2
 #define BUTTON      gfmType_reserved_3
 #define PLAYER      gfmType_reserved_4
+#define DOC         gfmType_reserved_5
 /** 'Export' all types */
 extern char *pDictNames[];
 extern int pDictTypes[];

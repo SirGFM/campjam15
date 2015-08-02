@@ -74,6 +74,14 @@ gfmRV player_collide(player *pPl, gameCtx *pGame);
 gfmRV player_updateWave(player *pPl, gameCtx *pGame);
 
 /**
+ * Updates the player, allowing the player to control it
+ * 
+ * @param  pPl The player
+ * @return     ...
+ */
+gfmRV player_update(player *pPl, gameCtx *pGame);
+
+/**
  * Draw the player
  * 
  * @param  pPl The player
