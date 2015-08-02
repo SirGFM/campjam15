@@ -26,13 +26,15 @@ enum enIntroState {
 typedef enum enIntroState introState;
 
 /** All the texts that are shown before the actual game... (or whatever) */
-#define NUM_TEXTS 5
+#define NUM_TEXTS 7
 char *pTexts[] = {
     "MWAHAHAHA",
     "THE ULTIMATE LIFE FORM IS ALMOST COMPLETE",
-    "THIS CYBER T-REX WILL BE ABLE TO TRAVEL BACK IN TIME AND WILL ALLOW ME TO "
-        "CONTROL ALL DINOSSAURS",
-    "AND WITH THEIR COMBINED POWERS, THE WORLD WILL FINALLY BE MINE!",
+    "I'M GOING TO TRANSFORM THIS LAB-GENERATED T-REX INTO A CYBER T-REX",
+    "IT WILL BE ABLE TO TRAVEL BACK IN TIME AND I SHOULD HAVE COMPLETE CONTROL "
+            "OVER IT",
+    "WITH ITS POWERS, I'M GOING TO TAKE CONTROL OVER ALL THE DINOSSAURS!",
+    "THEN, THE WORLD WILL FINALLY BE MINE!",
     "CYBER T-REX... ACTIVATE!"
 };
 
@@ -151,8 +153,8 @@ gfmRV intro_init(gameCtx *pGame) {
     rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     // Prepare the text
-    rv = gfmText_init(pGame->common.pText, 0/*x*/, 24/*y*/, width / 8,
-            4/*maxLines*/, 100/*delay*/, 0/*dontBindToWorld*/, pGame->pSset8x8,
+    rv = gfmText_init(pGame->common.pText, 0/*x*/, 16/*y*/, width / 8,
+            4/*maxLines*/, 50/*delay*/, 0/*dontBindToWorld*/, pGame->pSset8x8,
             0/*firstTile*/);
     ASSERT_NR(rv == GFMRV_OK);
     
