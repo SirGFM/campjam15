@@ -416,13 +416,13 @@ __ret:
     return rv;
 }
 
-gfmRV doc_wasHit(doc *pDoc) {
+gfmRV doc_isAlive(doc *pDoc) {
     gfmRV rv;
     
     // Sanitize arguments
     ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
     
-    ASSERT(pDoc->anim == DOC_HIT, GFMRV_FALSE);
+    ASSERT(pDoc->lives > 0, GFMRV_FALSE);
     
     rv = GFMRV_TRUE;
 __ret:

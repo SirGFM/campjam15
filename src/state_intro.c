@@ -37,6 +37,10 @@ char *pTexts[] = {
     "THEN, THE WORLD WILL FINALLY BE MINE!",
     "CYBER T-REX... ACTIVATE!"
 };
+static char dinoWin[] = "THE DINOSSAUR DEFEATED THE EVIL DOCTOR!\n(PRESS 'R' "
+        "TO RESTART)";
+static char docWin[] = "THE DOCTOR DEFEATED THE REBELOUS T-REX!\n(PRESS 'R' TO "
+        "RESTART)";
 
 static int pBulletAnimData[] = {
 /* len,fps,loop,frames...*/
@@ -154,7 +158,7 @@ gfmRV intro_init(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     // Prepare the text
     rv = gfmText_init(pGame->common.pText, 0/*x*/, 16/*y*/, width / 8,
-            4/*maxLines*/, 50/*delay*/, 0/*dontBindToWorld*/, pGame->pSset8x8,
+            3/*maxLines*/, 50/*delay*/, 0/*dontBindToWorld*/, pGame->pSset8x8,
             0/*firstTile*/);
     ASSERT_NR(rv == GFMRV_OK);
     
@@ -196,6 +200,36 @@ __ret:
  * @param  pGame The game's context
  * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
  */
+gfmRV intro_update_gameover(gameCtx *pGame) {
+    gfmRV rv;
+    gfmInputState reset;
+    int nreset;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    
+    rv = gfmText_update(pGame->common.pText, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfm_getKeyState(&reset, &nreset, pGame->pCtx, pGame->resetHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    if ((reset & gfmInput_justPressed) == gfmInput_justPressed) {
+        pGame->state = state_reset;
+        return GFMRV_OK;
+    }
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Update the state
+ * 
+ * @param  pGame The game's context
+ * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
+ */
 gfmRV intro_update_game(gameCtx *pGame) {
     gfmRV rv;
     introCtx *pIntro;
@@ -207,6 +241,19 @@ gfmRV intro_update_game(gameCtx *pGame) {
     ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
     // Get the current state
     pIntro = (introCtx*)(pGame->pState);
+    
+    if (player_isAlive(pIntro->pPl) == GFMRV_FALSE) {
+        pIntro->state = intro_gameover;
+        rv = gfmText_setText(pGame->common.pText, docWin, strlen(docWin),
+                1/*doCopy*/);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (doc_isAlive(pIntro->pDoc) == GFMRV_FALSE) {
+        pIntro->state = intro_gameover;
+        rv = gfmText_setText(pGame->common.pText, dinoWin, strlen(dinoWin),
+                1/*doCopy*/);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
     
     rv = gfm_getKeyState(&reset, &nreset, pGame->pCtx, pGame->resetHnd);
     ASSERT_NR(rv == GFMRV_OK);
@@ -379,26 +426,41 @@ gfmRV intro_update_begin(gameCtx *pGame) {
     rv = player_updateWave(pIntro->pPl, pGame);
     ASSERT_NR(rv == GFMRV_OK);
     
-    // TODO Collide everything
-#if 0
-    do {
-        int height, width;
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
 
-        rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
-        ASSERT_NR(rv == GFMRV_OK);
-        rv = gfmQuadtree_initRoot(pGame->common.pQt, -2/*x*/, -2/*y*/, width + 4,
-                height + 4, 4/*maxDepth*/, 6/*maxNodes*/);
-        ASSERT_NR(rv == GFMRV_OK);
-
-        rv = gfmQuadtree_populateTilemap(pGame->common.pQt, pGame->common.pTMap);
-        ASSERT_NR(rv == GFMRV_OK);
-
-        rv =  player_collide(pIntro->pPl, pGame);
-        ASSERT_NR(rv == GFMRV_OK);
-        rv =  doc_collide(pIntro->pDoc, pGame);
-        ASSERT_NR(rv == GFMRV_OK);
-    } while (0);
-#endif
+/**
+ * Draw the state
+ * 
+ * @param  pGame The game's context
+ * @return       GFMRV_OK, GFMRV_ARGUMENTS_BAD, ...
+ */
+gfmRV intro_draw_gameover(gameCtx *pGame) {
+    gfmRV rv;
+    introCtx *pIntro;
+    
+    // Sanitize arguments
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
+    // Get the current state
+    pIntro = (introCtx*)(pGame->pState);
+    
+    rv = gfmTilemap_draw(pGame->common.pTMap, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = player_draw(pIntro->pPl, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = doc_draw(pIntro->pDoc, pGame);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_draw(pIntro->pBullet1, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_draw(pIntro->pBullet2, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfmText_draw(pGame->common.pText, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_OK;
 __ret:
@@ -594,6 +656,10 @@ gfmRV intro(gameCtx *pGame, int jumpIntro) {
                     rv = intro_update_game(pGame);
                     ASSERT_NR(rv == GFMRV_OK);
                 } break;
+                case intro_gameover: {
+                    rv = intro_update_gameover(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
                 default: break;
             }
             
@@ -617,6 +683,10 @@ gfmRV intro(gameCtx *pGame, int jumpIntro) {
                 } break;
                 case intro_game: {
                     rv = intro_draw_game(pGame);
+                    ASSERT_NR(rv == GFMRV_OK);
+                } break;
+                case intro_gameover: {
+                    rv = intro_draw_gameover(pGame);
                     ASSERT_NR(rv == GFMRV_OK);
                 } break;
                 default: break;

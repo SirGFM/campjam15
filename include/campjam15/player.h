@@ -94,7 +94,7 @@ gfmRV player_draw(player *pPl, gameCtx *pGame);
  */
 gfmRV player_hit(player *pPl, gfmSprite *pBul);
 
-gfmRV player_wasHit(player *pPl);
+gfmRV player_isAlive(player *pPl);
 
 #endif /* __PLAYER_H__ */
 
