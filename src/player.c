@@ -35,6 +35,8 @@ struct stPlayer {
     int timeShooting;
     playerAnim anim;
     int lives;
+    int playHit;
+    int playDeath;
 };
 
 /**
@@ -130,6 +132,13 @@ gfmRV player_play(player *pPl, playerAnim anim) {
     // If we just shoot, make sure it finished playing
     if (anim == PL_HIT) {
         pPl->lives--;
+        
+        if (pPl->lives > 0) {
+            pPl->playHit = 1;
+        }
+        else {
+            pPl->playDeath = 1;
+        }
     }
     else if (pPl->anim == PL_SHOOT) {
         rv = gfmSprite_didAnimationFinish(pPl->pSpr);
@@ -229,6 +238,23 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
     
+    if (pPl->playHit) {
+#ifndef DEBUG
+        // Play the sfx
+        rv = gfm_playAudio(0, pGame->pCtx, pGame->hit, 0.8);
+        ASSERT_NR(rv == GFMRV_OK);
+#endif
+        pPl->playHit = 0;
+    }
+    if (pPl->playDeath) {
+#ifndef DEBUG
+        // Play the sfx
+        rv = gfm_playAudio(0, pGame->pCtx, pGame->death, 0.8);
+        ASSERT_NR(rv == GFMRV_OK);
+#endif
+        pPl->playDeath = 0;
+    }
+    
     // Get all the key states
     rv = gfm_getKeyState(&action, &nAction, pGame->pCtx, pGame->p1ActionHnd);
     ASSERT_NR(rv == GFMRV_OK);
@@ -252,6 +278,12 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
         if ((jump & gfmInput_justPressed) == gfmInput_justPressed) {
             rv = gfmSprite_setVerticalVelocity(pPl->pSpr, -200);
             ASSERT_NR(rv == GFMRV_OK);
+            
+#ifndef DEBUG
+            // Play the sfx
+            rv = gfm_playAudio(0, pGame->pCtx, pGame->jump2, 0.8);
+            ASSERT_NR(rv == GFMRV_OK);
+#endif
         }
         else {
             rv = gfmSprite_setVerticalVelocity(pPl->pSpr, 32);
@@ -305,6 +337,12 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
             
             rv = gfmSprite_setVerticalVelocity(pPl->pSpr, 0);
             ASSERT_NR(rv == GFMRV_OK);
+            
+#ifndef DEBUG
+            // Play the sfx
+            rv = gfm_playAudio(0, pGame->pCtx, pGame->shoot, 0.8);
+            ASSERT_NR(rv == GFMRV_OK);
+#endif
         }
     }
     

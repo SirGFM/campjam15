@@ -31,6 +31,9 @@ struct stDoc {
     gfmSprite *pSpr;
     docAnim anim;
     int lives;
+    int justReflected;
+    int playHit;
+    int playDeath;
 };
 
 /**
@@ -156,6 +159,31 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
     ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
     
+    if (pDoc->justReflected) {
+#ifndef DEBUG
+        // Play the sfx
+        rv = gfm_playAudio(0, pGame->pCtx, pGame->reflect, 0.8);
+        ASSERT_NR(rv == GFMRV_OK);
+#endif
+        pDoc->justReflected = 0;
+    }
+    if (pDoc->playHit) {
+#ifndef DEBUG
+        // Play the sfx
+        rv = gfm_playAudio(0, pGame->pCtx, pGame->hit, 0.8);
+        ASSERT_NR(rv == GFMRV_OK);
+#endif
+        pDoc->playHit = 0;
+    }
+    if (pDoc->playDeath) {
+#ifndef DEBUG
+        // Play the sfx
+        rv = gfm_playAudio(0, pGame->pCtx, pGame->death, 0.8);
+        ASSERT_NR(rv == GFMRV_OK);
+#endif
+        pDoc->playDeath = 0;
+    }
+    
     // Get all the key states
     rv = gfm_getKeyState(&action, &nAction, pGame->pCtx, pGame->p2ActionHnd);
     ASSERT_NR(rv == GFMRV_OK);
@@ -179,6 +207,12 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
         if ((jump & gfmInput_justPressed) == gfmInput_justPressed) {
             rv = gfmSprite_setVerticalVelocity(pDoc->pSpr, -200);
             ASSERT_NR(rv == GFMRV_OK);
+            
+#ifndef DEBUG
+            // Play the sfx
+            rv = gfm_playAudio(0, pGame->pCtx, pGame->jump1, 0.8);
+            ASSERT_NR(rv == GFMRV_OK);
+#endif
         }
         else {
             rv = gfmSprite_setVerticalVelocity(pDoc->pSpr, 32);
@@ -204,6 +238,11 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
     if ((action & gfmInput_justPressed) == gfmInput_justPressed) {
         if (pDoc->anim != DOC_SHIELD) {
             justShielded = 1;
+#ifndef DEBUG
+            // Play the sfx
+            rv = gfm_playAudio(0, pGame->pCtx, pGame->barrier, 0.8);
+            ASSERT_NR(rv == GFMRV_OK);
+#endif
         }
     }
     
@@ -323,6 +362,8 @@ gfmRV doc_hit(doc *pDoc, gfmSprite *pBul) {
             ASSERT_NR(rv == GFMRV_OK);
             rv = gfmSprite_playAnimation(pBul, 1);
             ASSERT_NR(rv == GFMRV_OK);
+            
+            pDoc->justReflected = 1;
         }
         else {
             // We are hit!
@@ -355,6 +396,14 @@ gfmRV doc_play(doc *pDoc, docAnim anim) {
     }
     else if (anim == DOC_HIT) {
         pDoc->lives--;
+        
+        if (pDoc->lives > 0) {
+            pDoc->playHit = 1;
+        }
+        else {
+            pDoc->playDeath = 1;
+        }
+        
     }
     
     // Set the animation
@@ -374,6 +423,7 @@ gfmRV doc_wasHit(doc *pDoc) {
     ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
     
     ASSERT(pDoc->anim == DOC_HIT, GFMRV_FALSE);
+    
     rv = GFMRV_TRUE;
 __ret:
     return rv;

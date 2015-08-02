@@ -80,7 +80,15 @@ struct stGameCtx {
     int p2LeftHnd;
     /** Handle for the 'right' key */
     int p2RightHnd;
+    /** Audio handles */
     int song;
+    int barrier;
+    int death;
+    int jump2;
+    int jump1;
+    int reflect;
+    int shoot;
+    int hit;
     /** Current state's context; It's set to NULL before changing the state */
     void *pState;
 };

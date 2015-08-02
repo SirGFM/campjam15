@@ -74,6 +74,21 @@ static gfmRV loadAssets(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_setRepeat(pGame->pCtx, pGame->song, 0);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = gfm_loadAudio(&(pGame->jump2), pGame->pCtx, "jump2.wav", 9);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_loadAudio(&(pGame->barrier), pGame->pCtx, "barrier.wav", 11);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_loadAudio(&(pGame->death), pGame->pCtx, "death.wav", 9);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_loadAudio(&(pGame->jump1), pGame->pCtx, "jump1.wav", 9);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_loadAudio(&(pGame->reflect), pGame->pCtx, "reflect.wav", 11);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_loadAudio(&(pGame->shoot), pGame->pCtx, "shoot.wav", 9);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_loadAudio(&(pGame->hit), pGame->pCtx, "hit.wav", 7);
+    ASSERT_NR(rv == GFMRV_OK);
 #endif
     
     rv = GFMRV_OK;
