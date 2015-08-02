@@ -104,40 +104,42 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // Add all virtual keys
-    rv = gfm_addVirtualKey(&(game.actionHnd), game.pCtx);
+    rv = gfm_addVirtualKey(&(game.p1ActionHnd), game.pCtx);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_addVirtualKey(&(game.jumpHnd), game.pCtx);
+    rv = gfm_addVirtualKey(&(game.p1JumpHnd), game.pCtx);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_addVirtualKey(&(game.leftHnd), game.pCtx);
+    rv = gfm_addVirtualKey(&(game.p1LeftHnd), game.pCtx);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_addVirtualKey(&(game.rightHnd), game.pCtx);
+    rv = gfm_addVirtualKey(&(game.p1RightHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.p2ActionHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.p2JumpHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.p2LeftHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.p2RightHnd), game.pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Bind all inputs
-    rv = gfm_bindInput(game.pCtx, game.actionHnd, gfmKey_x);
+    rv = gfm_bindInput(game.pCtx, game.p1ActionHnd, gfmKey_space);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.actionHnd, gfmKey_space);
+    rv = gfm_bindInput(game.pCtx, game.p1JumpHnd, gfmKey_w);
     ASSERT_NR(rv == GFMRV_OK);
-    
-    rv = gfm_bindInput(game.pCtx, game.jumpHnd, gfmKey_z);
+    rv = gfm_bindInput(game.pCtx, game.p1LeftHnd, gfmKey_a);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.jumpHnd, gfmKey_w);
+    rv = gfm_bindInput(game.pCtx, game.p1RightHnd, gfmKey_d);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.jumpHnd, gfmKey_up);
+    rv = gfm_bindInput(game.pCtx, game.p2ActionHnd, gfmKey_n0);
     ASSERT_NR(rv == GFMRV_OK);
-    
-    rv = gfm_bindInput(game.pCtx, game.leftHnd, gfmKey_a);
+    rv = gfm_bindInput(game.pCtx, game.p2JumpHnd, gfmKey_up);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.leftHnd, gfmKey_left);
+    rv = gfm_bindInput(game.pCtx, game.p2LeftHnd, gfmKey_left);
     ASSERT_NR(rv == GFMRV_OK);
-    
-    rv = gfm_bindInput(game.pCtx, game.rightHnd, gfmKey_d);
-    ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.rightHnd, gfmKey_right);
+    rv = gfm_bindInput(game.pCtx, game.p2RightHnd, gfmKey_right);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Alloc common stuff
-    // TODO Alloc everything!!!
     rv = gfmQuadtree_getNew(&(game.common.pQt));
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmTilemap_getNew(&(game.common.pTMap));

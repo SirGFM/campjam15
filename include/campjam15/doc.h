@@ -20,8 +20,8 @@ enum enDocAnim {
     DOC_STAND,
     DOC_WALK,
     DOC_SHIELD,
-    DOC_SPAWN,
     DOC_HIT,
+    DOC_SPAWN,
     DOC_SHOOT,
     DOC_MAX
 };
@@ -74,6 +74,8 @@ gfmRV doc_draw(doc *pDoc, gameCtx *pGame);
  * Try to hit the doc
  */
 gfmRV doc_hit(doc *pDoc);
+
+gfmRV doc_play(doc *pDoc, docAnim anim);
 
 #endif /* __DOC_H__ */
 

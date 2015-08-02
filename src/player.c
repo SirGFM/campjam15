@@ -25,7 +25,7 @@ int pPlAnimData[] = {
 /* STAND      */ 1 , 0 ,  0 , 52,
 /* WALK       */ 2 , 8 ,  1 , 53,54,
 /* SHOOT      */ 2 , 16,  0 , 55,56,
-/* HIT        */ 6 , 12,  0 , 57,58,57,58,
+/* HIT        */ 6 , 12,  0 , 57,58,57,58,57,58,
                  0
 };
 int plAnimDataLen = sizeof(pPlAnimData) / sizeof(int) - 1;
@@ -224,13 +224,13 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
     
     // Get all the key states
-    rv = gfm_getKeyState(&action, &nAction, pGame->pCtx, pGame->actionHnd);
+    rv = gfm_getKeyState(&action, &nAction, pGame->pCtx, pGame->p1ActionHnd);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_getKeyState(&jump, &nJump, pGame->pCtx, pGame->jumpHnd);
+    rv = gfm_getKeyState(&jump, &nJump, pGame->pCtx, pGame->p1JumpHnd);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_getKeyState(&left, &nLeft, pGame->pCtx, pGame->leftHnd);
+    rv = gfm_getKeyState(&left, &nLeft, pGame->pCtx, pGame->p1LeftHnd);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_getKeyState(&right, &nRight, pGame->pCtx, pGame->rightHnd);
+    rv = gfm_getKeyState(&right, &nRight, pGame->pCtx, pGame->p1RightHnd);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Get the current status of the player (if it's touching anything)

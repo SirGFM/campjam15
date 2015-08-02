@@ -2,6 +2,7 @@
  * @file src/doc.c
  * 
  */
+#include <campjam15/collision.h>
 #include <campjam15/doc.h>
 #include <campjam15/gameCtx.h>
 
@@ -18,8 +19,8 @@ int pDocAnimData[] = {
 /* STAND  */ 1 , 0 ,  0 , 32,
 /* WALK   */ 2 , 16,  1 , 33,34,
 /* SHIELD */ 13, 16,  0 , 35,35,36,37,38,39,38,39,38,37,36,35,35,
+/* HIT    */ 6 , 12,  0 , 40,41,40,41,40,41,
 /* SPAWN  */ 4 , 16,  0 , 35,35,35,35,
-/* HIT    */ 
 /* SHOOT  */ 
              0
 };
@@ -27,6 +28,7 @@ int docAnimDataLen = sizeof(pDocAnimData) / sizeof(int) - 1;
 
 struct stDoc {
     gfmSprite *pSpr;
+    docAnim anim;
 };
 
 /**
@@ -60,14 +62,14 @@ gfmRV doc_init(doc **ppDoc, gameCtx *pGame, int x, int y) {
     rv = gfmSprite_getNew(&(pDoc->pSpr));
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfmSprite_init(pDoc->pSpr, x, y, 10/*width*/, 22/*height*/,
-            pGame->pSset32x32, -12/*offX*/, -8/*offY*/, 0/*child*/, DOC);
+            pGame->pSset32x32, -12/*offX*/, -8/*offY*/, pDoc/*child*/, DOC);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Add every animation
     rv = gfmSprite_addAnimations(pDoc->pSpr, pDocAnimData, docAnimDataLen);
     ASSERT_NR(rv == GFMRV_OK);
     // Play the sleep animation
-    rv = gfmSprite_playAnimation(pDoc->pSpr, DOC_STAND);
+    rv = doc_play(pDoc, DOC_STAND);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Set the acceleration
@@ -115,9 +117,14 @@ gfmRV doc_collide(doc *pDoc, gameCtx *pGame) {
     // Sanitize arguments
     ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
     
-    // TODO Actually collide the player
-    rv = gfmQuadtree_populateSprite(pGame->common.pQt, pDoc->pSpr);
-    ASSERT_NR(rv == GFMRV_OK);
+    // Actually collide the doc
+    rv = gfmQuadtree_collideSprite(pGame->common.pQt, pDoc->pSpr);
+    ASSERT_NR(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE);
+    // If a collision was detected, handle it and continue the operation
+    if (rv == GFMRV_QUADTREE_OVERLAPED) {
+        rv = collide(pGame->common.pQt);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
     
     rv = GFMRV_OK;
 __ret:
@@ -131,6 +138,102 @@ __ret:
  * @return      ...
  */
 gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
+    double vx, vy;
+    gfmCollision dir;
+    gfmInputState action, jump, left, right;
+    gfmRV rv;
+    int nAction, nJump, nLeft, nRight;
+    int justShielded;
+    
+    // Set default values
+    justShielded = 0;
+    
+    // Sanitize arguments
+    ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
+    ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
+    
+    // Get all the key states
+    rv = gfm_getKeyState(&action, &nAction, pGame->pCtx, pGame->p2ActionHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getKeyState(&jump, &nJump, pGame->pCtx, pGame->p2JumpHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getKeyState(&left, &nLeft, pGame->pCtx, pGame->p2LeftHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_getKeyState(&right, &nRight, pGame->pCtx, pGame->p2RightHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Get the current status of the player (if it's touching anything)
+    rv = gfmSprite_getCollision(&dir, pDoc->pSpr);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    // Make it fall
+    rv = gfmSprite_setVerticalAcceleration(pDoc->pSpr, 500);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Make sure it doesn't clip through the floor
+    if ((dir & gfmCollision_down) == gfmCollision_down) {
+        // If we are touching the ground and pressed jump, JUMP
+        if ((jump & gfmInput_justPressed) == gfmInput_justPressed) {
+            rv = gfmSprite_setVerticalVelocity(pDoc->pSpr, -200);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        else {
+            rv = gfmSprite_setVerticalVelocity(pDoc->pSpr, 32);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+    }
+    
+    // Horizontal movement...
+    if ((left & gfmInput_pressed) == gfmInput_pressed) {
+        rv = gfmSprite_setHorizontalVelocity(pDoc->pSpr, -64);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if ((right & gfmInput_pressed) == gfmInput_pressed) {
+        rv = gfmSprite_setHorizontalVelocity(pDoc->pSpr, 64);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else {
+        rv = gfmSprite_setHorizontalVelocity(pDoc->pSpr, 0);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    // If the action button was pressed, try to shield
+    if ((action & gfmInput_justPressed) == gfmInput_justPressed) {
+        if (pDoc->anim != DOC_SHIELD) {
+            justShielded = 1;
+        }
+    }
+    
+    // Update the animation
+    rv = gfmSprite_getVelocity(&vx, &vy, pDoc->pSpr);
+    ASSERT_NR(rv == GFMRV_OK);
+    if (pDoc->anim == DOC_HIT) {
+    }
+    else if (justShielded) {
+        rv = doc_play(pDoc, DOC_SHIELD);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (pDoc->anim == DOC_SHIELD) {
+        rv = gfmSprite_didAnimationFinish(pDoc->pSpr);
+        if (rv == GFMRV_TRUE) {
+            rv = doc_play(pDoc, DOC_STAND);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+    }
+    else if (vx == 0.0) {
+        rv = doc_play(pDoc, DOC_STAND);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    else if (vx != 0.0) {
+        rv = doc_play(pDoc, DOC_WALK);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    // Actually update the sprite
+    rv = gfmSprite_update(pDoc->pSpr, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    rv = GFMRV_OK;
+__ret:
     return GFMRV_OK;
 }
 
@@ -149,6 +252,64 @@ gfmRV doc_draw(doc *pDoc, gameCtx *pGame) {
     rv = gfmSprite_draw(pDoc->pSpr, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+/**
+ * Try to hit the doc
+ */
+gfmRV doc_hit(doc *pDoc) {
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
+    
+    // If we are shielding, check if it's an iFrame
+    if (pDoc->anim == DOC_SHIELD) {
+        int frame;
+        
+        rv = gfmSprite_getFrame(&frame, pDoc->pSpr);
+        ASSERT_NR(rv == GFMRV_OK);
+        
+        if (frame >= 36 && frame <= 39) {
+            // TODO Reflect the bullet!
+        }
+        else {
+            // We are hit!
+            rv = doc_play(pDoc, DOC_HIT);
+        }
+    }
+    else if (pDoc->anim != DOC_HIT) {
+        // We are hit!
+        rv = doc_play(pDoc, DOC_HIT);
+        ASSERT_NR(rv == GFMRV_OK);
+    }
+    
+    rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+gfmRV doc_play(doc *pDoc, docAnim anim) {
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
+    ASSERT(anim < DOC_MAX, GFMRV_ARGUMENTS_BAD);
+    
+    // If we just shoot, make sure it finished playing
+    if (pDoc->anim == DOC_SHIELD) {
+        rv = gfmSprite_didAnimationFinish(pDoc->pSpr);
+        ASSERT(rv == GFMRV_TRUE, GFMRV_OK);
+    }
+    
+    // Set the animation
+    rv = gfmSprite_playAnimation(pDoc->pSpr, anim);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    pDoc->anim = anim;
     rv = GFMRV_OK;
 __ret:
     return rv;

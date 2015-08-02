@@ -65,13 +65,21 @@ struct stGameCtx {
     /** Handle of the texture managed by the library */
     int iTex;
     /** Handle for the 'action' key */
-    int actionHnd;
+    int p1ActionHnd;
     /** Handle for the 'jump' key */
-    int jumpHnd;
+    int p1JumpHnd;
     /** Handle for the 'left' key */
-    int leftHnd;
+    int p1LeftHnd;
     /** Handle for the 'right' key */
-    int rightHnd;
+    int p1RightHnd;
+    /** Handle for the 'action' key */
+    int p2ActionHnd;
+    /** Handle for the 'jump' key */
+    int p2JumpHnd;
+    /** Handle for the 'left' key */
+    int p2LeftHnd;
+    /** Handle for the 'right' key */
+    int p2RightHnd;
     /** Current state's context; It's set to NULL before changing the state */
     void *pState;
 };
