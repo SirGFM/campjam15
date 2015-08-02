@@ -300,6 +300,7 @@ gfmRV doc_hit(doc *pDoc, gfmSprite *pBul) {
         else {
             // We are hit!
             rv = doc_play(pDoc, DOC_HIT);
+            ASSERT_NR(rv == GFMRV_OK);
         }
     }
     else if (pDoc->anim != DOC_HIT) {
@@ -332,6 +333,18 @@ gfmRV doc_play(doc *pDoc, docAnim anim) {
     
     pDoc->anim = anim;
     rv = GFMRV_OK;
+__ret:
+    return rv;
+}
+
+gfmRV doc_wasHit(doc *pDoc) {
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
+    
+    ASSERT(pDoc->anim == DOC_HIT, GFMRV_FALSE);
+    rv = GFMRV_TRUE;
 __ret:
     return rv;
 }

@@ -77,5 +77,7 @@ gfmRV doc_hit(doc *pDoc, gfmSprite *pBul);
 
 gfmRV doc_play(doc *pDoc, docAnim anim);
 
+gfmRV doc_wasHit(doc *pDoc);
+
 #endif /* __DOC_H__ */
 

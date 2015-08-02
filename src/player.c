@@ -375,3 +375,16 @@ __ret:
     return rv;
 }
 
+gfmRV player_wasHit(player *pPl) {
+    gfmRV rv;
+    
+    // Sanitize arguments
+    ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
+    
+    ASSERT(pPl->anim == PL_HIT, GFMRV_FALSE);
+    rv = GFMRV_TRUE;
+__ret:
+    return rv;
+}
+
+
