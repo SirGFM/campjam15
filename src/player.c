@@ -34,6 +34,7 @@ struct stPlayer {
     gfmSprite *pSpr;
     int timeShooting;
     playerAnim anim;
+    int lives;
 };
 
 /**
@@ -81,6 +82,8 @@ gfmRV player_init(player **ppPl, gameCtx *pGame, int x, int y) {
     rv = gfmSprite_setVerticalAcceleration(pPl->pSpr, -500);
     ASSERT_NR(rv == GFMRV_OK);
     
+    pPl->lives = 5;
+    
     *ppPl = pPl;
     rv = GFMRV_OK;
 __ret:
@@ -125,7 +128,10 @@ gfmRV player_play(player *pPl, playerAnim anim) {
     ASSERT(anim < PL_MAX, GFMRV_ARGUMENTS_BAD);
     
     // If we just shoot, make sure it finished playing
-    if (pPl->anim == PL_SHOOT) {
+    if (anim == PL_HIT) {
+        pPl->lives--;
+    }
+    else if (pPl->anim == PL_SHOOT) {
         rv = gfmSprite_didAnimationFinish(pPl->pSpr);
         ASSERT(rv == GFMRV_TRUE, GFMRV_OK);
     }
@@ -306,15 +312,24 @@ gfmRV player_update(player *pPl, gameCtx *pGame) {
     rv = gfmSprite_getVelocity(&vx, &vy, pPl->pSpr);
     ASSERT_NR(rv == GFMRV_OK);
     if (pPl->anim == PL_HIT) {
-        int x, y;
-        
         // Do nothing if we were hit
         rv = gfmSprite_setVelocity(pPl->pSpr, 0, 0);
         ASSERT_NR(rv == GFMRV_OK);
-        rv = gfmSprite_getPosition(&x, &y, pPl->pSpr);
-        ASSERT_NR(rv == GFMRV_OK);
-        rv = gfmSprite_setPosition(pPl->pSpr, x, y + 2);
-        ASSERT_NR(rv == GFMRV_OK);
+        if (pPl->lives <= 0) {
+            int x, y;
+        
+            rv = gfmSprite_getPosition(&x, &y, pPl->pSpr);
+            ASSERT_NR(rv == GFMRV_OK);
+            rv = gfmSprite_setPosition(pPl->pSpr, x, y + 2);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        else {
+            rv = gfmSprite_didAnimationFinish(pPl->pSpr);
+            if (rv == GFMRV_TRUE) {
+                rv = player_play(pPl, PL_STAND);
+                ASSERT_NR(rv == GFMRV_OK);
+            }
+        }
     }
     else if (justShoot) {
         rv = player_play(pPl, PL_SHOOT);
@@ -346,12 +361,23 @@ __ret:
  */
 gfmRV player_draw(player *pPl, gameCtx *pGame) {
     gfmRV rv;
+    int i, x, y;
     
     // Sanitize arguments
     ASSERT(pPl, GFMRV_ARGUMENTS_BAD);
     
     rv = gfmSprite_draw(pPl->pSpr, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    // Draw the player's lives
+    i = pPl->lives;
+    x = 0;
+    y = 48;
+    while (i > 0) {
+        rv = gfm_drawTile(pGame->pCtx, pGame->pSset32x32, x, y, 24);
+        i--;
+        x += 22;
+    }
     
     rv = GFMRV_OK;
 __ret:

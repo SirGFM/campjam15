@@ -71,7 +71,8 @@ struct stIntroCtx {
     /** The evil doc sprite */
     doc *pDoc;
     /** The player's single bullet */
-    gfmSprite *pBullet;
+    gfmSprite *pBullet1;
+    gfmSprite *pBullet2;
     /** Effect on top of the machine */
     gfmTilemap *pMachineFx;
     /** Effect that 'flashes' the screen */
@@ -169,13 +170,21 @@ gfmRV intro_init(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     
     // Alloc and initialize the bullet
-    rv = gfmSprite_getNew(&(pIntro->pBullet));
+    rv = gfmSprite_getNew(&(pIntro->pBullet1));
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmSprite_init(pIntro->pBullet, 1000, -100, 14/*width*/, 8/*height*/,
+    rv = gfmSprite_init(pIntro->pBullet1, 1000, -100, 14/*width*/, 8/*height*/,
             pGame->pSset16x16, -1/*offX*/, -4/*offY*/, 0/*child*/, BULLET);
     ASSERT_NR(rv == GFMRV_OK);
     // Stupid trick, add the animation twice so we can reset it
-    rv = gfmSprite_addAnimations(pIntro->pBullet, pBulletAnimData, bulletAnimDataLen);
+    rv = gfmSprite_addAnimations(pIntro->pBullet1, pBulletAnimData, bulletAnimDataLen);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_getNew(&(pIntro->pBullet2));
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_init(pIntro->pBullet2, 1000, -100, 14/*width*/, 8/*height*/,
+            pGame->pSset16x16, -1/*offX*/, -4/*offY*/, 0/*child*/, BULLET);
+    ASSERT_NR(rv == GFMRV_OK);
+    // Stupid trick, add the animation twice so we can reset it
+    rv = gfmSprite_addAnimations(pIntro->pBullet2, pBulletAnimData, bulletAnimDataLen);
     ASSERT_NR(rv == GFMRV_OK);
     
     pIntro->state = intro_begin;
@@ -208,7 +217,9 @@ gfmRV intro_update_game(gameCtx *pGame) {
     rv = doc_update(pIntro->pDoc, pGame);
     ASSERT_NR(rv == GFMRV_OK);
     // Update the bullet
-    rv = gfmSprite_update(pIntro->pBullet, pGame->pCtx);
+    rv = gfmSprite_update(pIntro->pBullet1, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_update(pIntro->pBullet2, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     // Collide everything
@@ -234,7 +245,14 @@ gfmRV intro_update_game(gameCtx *pGame) {
         rv = doc_collide(pIntro->pDoc, pGame);
         ASSERT_NR(rv == GFMRV_OK);
         // Collide the bullet against the world
-        rv = gfmQuadtree_collideSprite(pGame->common.pQt, pIntro->pBullet);
+        rv = gfmQuadtree_collideSprite(pGame->common.pQt, pIntro->pBullet1);
+        ASSERT_NR(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE);
+        // If a collision was detected, handle it and continue the operation
+        if (rv == GFMRV_QUADTREE_OVERLAPED) {
+            rv = collide(pGame->common.pQt);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        rv = gfmQuadtree_collideSprite(pGame->common.pQt, pIntro->pBullet2);
         ASSERT_NR(rv == GFMRV_QUADTREE_OVERLAPED || rv == GFMRV_QUADTREE_DONE);
         // If a collision was detected, handle it and continue the operation
         if (rv == GFMRV_QUADTREE_OVERLAPED) {
@@ -405,7 +423,9 @@ gfmRV intro_draw_game(gameCtx *pGame) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = doc_draw(pIntro->pDoc, pGame);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmSprite_draw(pIntro->pBullet, pGame->pCtx);
+    rv = gfmSprite_draw(pIntro->pBullet1, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfmSprite_draw(pIntro->pBullet2, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
     
     // TODO Draw the bullets and the enemies...
@@ -506,7 +526,8 @@ gfmRV intro_clean(gameCtx *pGame) {
     pIntro = (introCtx*)(pGame->pState);
     
     // Free the tilemap
-    gfmSprite_free(&(pIntro->pBullet));
+    gfmSprite_free(&(pIntro->pBullet1));
+    gfmSprite_free(&(pIntro->pBullet2));
     gfmTilemap_free(&(pIntro->pFlashFx));
     gfmTilemap_free(&(pIntro->pMachineFx));
     player_free(pIntro->pPl);
@@ -609,8 +630,12 @@ __ret:
  */
 gfmRV shoot_bullet(gameCtx *pGame, int x, int y) {
     gfmRV rv;
+    gfmSprite *pSpr;
     int bX, bY, height, width;
     introCtx *pIntro;
+    
+    // Set default values
+    pSpr = 0;
     
     // Sanitize arguments
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
@@ -622,22 +647,35 @@ gfmRV shoot_bullet(gameCtx *pGame, int x, int y) {
     pIntro = (introCtx*)(pGame->pState);
     
     // Check that the bullet isn't on screen
-    rv = gfmSprite_getPosition(&bX, &bY, pIntro->pBullet);
+    rv = gfmSprite_getPosition(&bX, &bY, pIntro->pBullet1);
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
-    ASSERT(bX < 0 || bX > width, GFMRV_FALSE);
+    if (bX < 0 || bX > width) {
+        pSpr = pIntro->pBullet1;
+    }
+    else {
+        rv = gfmSprite_getPosition(&bX, &bY, pIntro->pBullet2);
+        ASSERT_NR(rv == GFMRV_OK);
+        rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+        ASSERT_NR(rv == GFMRV_OK);
+        if (bX < 0 || bX > width) {
+            pSpr = pIntro->pBullet2;
+        }
+    }
+    
+    ASSERT(pSpr, GFMRV_FALSE);
     
     // Set the bullet's position
-    rv = gfmSprite_setPosition(pIntro->pBullet, x, y);
+    rv = gfmSprite_setPosition(pSpr, x, y);
     ASSERT_NR(rv == GFMRV_OK);
     // Set it's velocity
-    rv = gfmSprite_setHorizontalVelocity(pIntro->pBullet, 200);
+    rv = gfmSprite_setHorizontalVelocity(pSpr, 200);
     ASSERT_NR(rv == GFMRV_OK);
     // Restart the animation
-    rv = gfmSprite_playAnimation(pIntro->pBullet, 1);
+    rv = gfmSprite_playAnimation(pSpr, 1);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfmSprite_playAnimation(pIntro->pBullet, 0);
+    rv = gfmSprite_playAnimation(pSpr, 0);
     ASSERT_NR(rv == GFMRV_OK);
     
     rv = GFMRV_TRUE;

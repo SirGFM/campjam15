@@ -30,6 +30,7 @@ int docAnimDataLen = sizeof(pDocAnimData) / sizeof(int) - 1;
 struct stDoc {
     gfmSprite *pSpr;
     docAnim anim;
+    int lives;
 };
 
 /**
@@ -76,6 +77,8 @@ gfmRV doc_init(doc **ppDoc, gameCtx *pGame, int x, int y) {
     // Set the acceleration
     rv = gfmSprite_setVerticalAcceleration(pDoc->pSpr, 500);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    pDoc->lives = 5;
     
     *ppDoc = pDoc;
     rv = GFMRV_OK;
@@ -208,15 +211,25 @@ gfmRV doc_update(doc *pDoc, gameCtx *pGame) {
     rv = gfmSprite_getVelocity(&vx, &vy, pDoc->pSpr);
     ASSERT_NR(rv == GFMRV_OK);
     if (pDoc->anim == DOC_HIT) {
-        int x, y;
         
         // Do nothing if we were hit
         rv = gfmSprite_setVelocity(pDoc->pSpr, 0, 0);
         ASSERT_NR(rv == GFMRV_OK);
-        rv = gfmSprite_getPosition(&x, &y, pDoc->pSpr);
-        ASSERT_NR(rv == GFMRV_OK);
-        rv = gfmSprite_setPosition(pDoc->pSpr, x, y + 2);
-        ASSERT_NR(rv == GFMRV_OK);
+        if (pDoc->lives <= 0) {
+            int x, y;
+            
+            rv = gfmSprite_getPosition(&x, &y, pDoc->pSpr);
+            ASSERT_NR(rv == GFMRV_OK);
+            rv = gfmSprite_setPosition(pDoc->pSpr, x, y + 2);
+            ASSERT_NR(rv == GFMRV_OK);
+        }
+        else {
+            rv = gfmSprite_didAnimationFinish(pDoc->pSpr);
+            if (rv == GFMRV_TRUE) {
+                rv = doc_play(pDoc, DOC_STAND);
+                ASSERT_NR(rv == GFMRV_OK);
+            }
+        }
     }
     else if (justShielded) {
         rv = doc_play(pDoc, DOC_SHIELD);
@@ -259,12 +272,26 @@ __ret:
  */
 gfmRV doc_draw(doc *pDoc, gameCtx *pGame) {
     gfmRV rv;
+    int height, i, width, x, y;
     
     // Sanitize arguments
     ASSERT(pDoc, GFMRV_ARGUMENTS_BAD);
     
     rv = gfmSprite_draw(pDoc->pSpr, pGame->pCtx);
     ASSERT_NR(rv == GFMRV_OK);
+    
+    // Draw the player's lives
+    rv = gfm_getCameraDimensions(&width, &height, pGame->pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    
+    i = pDoc->lives;
+    x = width - 24;
+    y = 48;
+    while (i > 0) {
+        rv = gfm_drawTile(pGame->pCtx, pGame->pSset32x32, x, y, 25);
+        i--;
+        x -= 24;
+    }
     
     rv = GFMRV_OK;
 __ret:
@@ -322,9 +349,12 @@ gfmRV doc_play(doc *pDoc, docAnim anim) {
     ASSERT(anim < DOC_MAX, GFMRV_ARGUMENTS_BAD);
     
     // If we just shoot, make sure it finished playing
-    if (pDoc->anim == DOC_SHIELD) {
+    if (pDoc->anim == DOC_SHIELD && anim != DOC_HIT) {
         rv = gfmSprite_didAnimationFinish(pDoc->pSpr);
         ASSERT(rv == GFMRV_TRUE, GFMRV_OK);
+    }
+    else if (anim == DOC_HIT) {
+        pDoc->lives--;
     }
     
     // Set the animation
