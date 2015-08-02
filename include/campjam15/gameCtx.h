@@ -29,6 +29,7 @@ extern int dictLen;
 /** Enumeration of states */
 enum enGameState {
     state_intro = 0,
+    state_reset,
     state_max
 };
 typedef enum enGameState gameState;
@@ -80,6 +81,8 @@ struct stGameCtx {
     int p2LeftHnd;
     /** Handle for the 'right' key */
     int p2RightHnd;
+    int resetHnd;
+    int ffHnd;
     /** Audio handles */
     int song;
     int barrier;

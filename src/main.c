@@ -154,8 +154,17 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_addVirtualKey(&(game.p2RightHnd), game.pCtx);
     ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.resetHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_addVirtualKey(&(game.ffHnd), game.pCtx);
+    ASSERT_NR(rv == GFMRV_OK);
     
     // Bind all inputs
+    rv = gfm_bindInput(game.pCtx, game.resetHnd, gfmKey_r);
+    ASSERT_NR(rv == GFMRV_OK);
+    rv = gfm_bindInput(game.pCtx, game.ffHnd, gfmKey_return);
+    ASSERT_NR(rv == GFMRV_OK);
+    
     rv = gfm_bindInput(game.pCtx, game.p1ActionHnd, gfmKey_space);
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_bindInput(game.pCtx, game.p1JumpHnd, gfmKey_w);
@@ -208,6 +217,10 @@ int main(int argc, char *argv[]) {
             default: rv = GFMRV_INTERNAL_ERROR;
         }
         ASSERT_NR(rv == GFMRV_OK);
+        
+        if (game.state == state_reset) {
+            game.state = state_intro;
+        }
     }
     
     rv = GFMRV_OK;

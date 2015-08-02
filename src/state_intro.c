@@ -203,12 +203,21 @@ __ret:
 gfmRV intro_update_game(gameCtx *pGame) {
     gfmRV rv;
     introCtx *pIntro;
+    gfmInputState reset;
+    int nreset;
     
     // Sanitize arguments
     ASSERT(pGame, GFMRV_ARGUMENTS_BAD);
     ASSERT(pGame->pState, GFMRV_ARGUMENTS_BAD);
     // Get the current state
     pIntro = (introCtx*)(pGame->pState);
+    
+    rv = gfm_getKeyState(&reset, &nreset, pGame->pCtx, pGame->resetHnd);
+    ASSERT_NR(rv == GFMRV_OK);
+    if ((reset & gfmInput_justPressed) == gfmInput_justPressed) {
+        pGame->state = state_reset;
+        return GFMRV_OK;
+    }
     
     // Update the player
     rv = player_update(pIntro->pPl, pGame);
