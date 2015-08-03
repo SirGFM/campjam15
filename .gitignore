@@ -37,3 +37,5 @@
 bin/
 # Ignore all swap files
 *.swp
+# WAVEs needn't be commited as they were uploaded on the release
+*.wav

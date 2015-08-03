@@ -39,8 +39,8 @@ char *pTexts[] = {
 };
 static char dinoWin[] = "THE DINOSSAUR DEFEATED THE EVIL DOCTOR!\n(PRESS 'R' "
         "TO RESTART)";
-static char docWin[] = "THE DOCTOR DEFEATED THE REBELOUS T-REX!\n(PRESS 'R' TO "
-        "RESTART)";
+static char docWin[] = "THE DOCTOR DEFEATED THE REBELIOUS T-REX!\n(PRESS 'R' "
+        "TO RESTART)";
 
 static int pBulletAnimData[] = {
 /* len,fps,loop,frames...*/
