@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_bindInput(game.pCtx, game.p1RightHnd, gfmKey_d);
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_bindInput(game.pCtx, game.p2ActionHnd, gfmKey_n0);
+    rv = gfm_bindInput(game.pCtx, game.p2ActionHnd, gfmKey_rctrl);
     ASSERT_NR(rv == GFMRV_OK);
     rv = gfm_bindInput(game.pCtx, game.p2JumpHnd, gfmKey_up);
     ASSERT_NR(rv == GFMRV_OK);

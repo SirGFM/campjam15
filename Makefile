@@ -53,7 +53,7 @@ CC = gcc
   endif
 # Set flags required by OS
   ifeq ($(OS), Win)
-    CFLAGS := $(CFLAGS) -I"/d/windows/mingw/include"
+    CFLAGS := $(CFLAGS) -I"/d/windows/mingw/include" -I/c/GFraMe/include
   else
     CFLAGS := $(CFLAGS) -fPIC
   endif
@@ -76,6 +76,7 @@ CC = gcc
       LFLAGS := $(LFLAGS) -L"/d/windows/mingw/mingw32/lib"
     endif
     LFLAGS := -mwindows -lmingw32 $(LFLAGS) -lSDL2main
+    LFLAGS := -L/c/GFraMe/lib/ $(LFLAGS)
 # TODO Add OpenGL
   else
     LFLAGS := -L/usr/lib/GFraMe/ $(LFLAGS)
