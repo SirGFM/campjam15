@@ -64,28 +64,28 @@ CC = gcc
 #==============================================================================
 # Define LFLAGS (linker flags)
 #==============================================================================
+# Add the framework
   ifeq ($(RELEASE), yes)
     LFLAGS := -lGFraMe
   else
     LFLAGS := -lGFraMe_dbg
   endif
-  LFLAGS := $(LFLAGS) -lm
+# Append SDL2
+  LFLAGS := $(LFLAGS) -lSDL2
 # Add libs and paths required by an especific OS
   ifeq ($(OS), Win)
-    ifeq ($(ARCH), x64)
-      LFLAGS := $(LFLAGS) -L"/d/windows/mingw/lib"
-    else
-      LFLAGS := $(LFLAGS) -L"/d/windows/mingw/mingw32/lib"
-    endif
     LFLAGS := -mwindows -lmingw32 $(LFLAGS) -lSDL2main
+    LFLAGS := -L/d/windows/mingw/mingw32/lib $(LFLAGS)
+# Prepend the framework search path
     LFLAGS := -L/c/GFraMe/lib/ $(LFLAGS)
 # TODO Add OpenGL
   else
+# Prepend the framework search path
     LFLAGS := -L/usr/lib/GFraMe/ $(LFLAGS)
 # TODO Add OpenGL
   endif
-# Add SDL2, GFraMe and pthread libs (pthread is used for loading stuff)
-  LFLAGS := $(LFLAGS) -lSDL2 -lpthread
+# Add pthread (pthread is used for loading stuff)
+  LFLAGS := $(LFLAGS) -lpthread
 #==============================================================================
 
 #==============================================================================
