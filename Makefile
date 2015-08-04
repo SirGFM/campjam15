@@ -84,8 +84,6 @@ CC = gcc
     LFLAGS := -L/usr/lib/GFraMe/ $(LFLAGS)
 # TODO Add OpenGL
   endif
-# Add pthread (pthread is used for loading stuff)
-  LFLAGS := $(LFLAGS) -lpthread
 #==============================================================================
 
 #==============================================================================
