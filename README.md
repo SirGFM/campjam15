@@ -7,7 +7,7 @@ A small versus game made for campjam 2015.
 This game depends on two libraries: SDL2 and GFraMe.
 
 SDL2 can be obtained from the library's site
-(https://www.libsdl.org/) while SDL2 can be obtained from its
+(https://www.libsdl.org/) while GFraMe can be obtained from its
 repository (https://github.com/SirGFM/GFraMetree/devel). Note
 that you must use the library's 'devel' branch! So, after
 cloning it, you must checkout the correct branch. To do so,
