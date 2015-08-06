@@ -3,73 +3,74 @@
  <tileset firstgid="1" name="atlas" tilewidth="8" tileheight="8">
   <image source="../atlas.bmp" trans="ff00ff" width="256" height="256"/>
   <terraintypes>
-   <terrain name="collideable" tile="64"/>
-   <terrain name="collideable" tile="96"/>
-   <terrain name="collideable" tile="65"/>
-   <terrain name="collideable" tile="97"/>
-   <terrain name="collideable" tile="66"/>
-   <terrain name="collideable" tile="98"/>
-   <terrain name="collideable" tile="67"/>
-   <terrain name="collideable" tile="99"/>
-   <terrain name="collideable" tile="133"/>
-   <terrain name="collideable" tile="134"/>
-   <terrain name="collideable" tile="135"/>
-   <terrain name="collideable" tile="77"/>
-   <terrain name="collideable" tile="109"/>
-   <terrain name="collideable" tile="141"/>
-   <terrain name="collideable" tile="78"/>
-   <terrain name="collideable" tile="110"/>
-   <terrain name="collideable" tile="142"/>
-   <terrain name="collideable" tile="79"/>
-   <terrain name="collideable" tile="111"/>
-   <terrain name="collideable" tile="143"/>
-   <terrain name="collideable" tile="80"/>
-   <terrain name="collideable" tile="112"/>
-   <terrain name="collideable" tile="144"/>
-   <terrain name="collideable" tile="81"/>
-   <terrain name="collideable" tile="113"/>
-   <terrain name="collideable" tile="145"/>
-   <terrain name="collideable" tile="82"/>
-   <terrain name="collideable" tile="114"/>
-   <terrain name="collideable" tile="146"/>
-   <terrain name="collideable" tile="83"/>
-   <terrain name="collideable" tile="115"/>
-   <terrain name="collideable" tile="147"/>
-   <terrain name="collideable" tile="84"/>
-   <terrain name="collideable" tile="116"/>
-   <terrain name="collideable" tile="148"/>
-   <terrain name="collideable" tile="85"/>
-   <terrain name="collideable" tile="117"/>
-   <terrain name="collideable" tile="149"/>
-   <terrain name="collideable" tile="86"/>
-   <terrain name="collideable" tile="118"/>
-   <terrain name="collideable" tile="150"/>
-   <terrain name="collideable" tile="87"/>
-   <terrain name="collideable" tile="119"/>
-   <terrain name="collideable" tile="88"/>
-   <terrain name="collideable" tile="100"/>
-   <terrain name="collideable" tile="132"/>
-   <terrain name="collideable" tile="101"/>
-   <terrain name="collideable" tile="102"/>
    <terrain name="collideable" tile="103"/>
-   <terrain name="collideable" tile="104"/>
-   <terrain name="collideable" tile="136"/>
-   <terrain name="collideable" tile="105"/>
-   <terrain name="collideable" tile="137"/>
-   <terrain name="collideable" tile="106"/>
-   <terrain name="collideable" tile="138"/>
-   <terrain name="collideable" tile="120"/>
-   <terrain name="button" tile="71"/>
    <terrain name="button" tile="72"/>
-   <terrain name="collideable" tile="103"/>
   </terraintypes>
+  <tile id="64" terrain="0,0,0,0"/>
+  <tile id="65" terrain="0,0,0,0"/>
+  <tile id="66" terrain="0,0,0,0"/>
+  <tile id="67" terrain="0,0,0,0"/>
+  <tile id="71" terrain="1,1,1,1"/>
+  <tile id="72" terrain="1,1,1,1"/>
+  <tile id="77" terrain="0,0,0,0"/>
+  <tile id="78" terrain="0,0,0,0"/>
+  <tile id="79" terrain="0,0,0,0"/>
+  <tile id="80" terrain="0,0,0,0"/>
+  <tile id="81" terrain="0,0,0,0"/>
+  <tile id="82" terrain="0,0,0,0"/>
+  <tile id="83" terrain="0,0,0,0"/>
+  <tile id="84" terrain="0,0,0,0"/>
+  <tile id="85" terrain="0,0,0,0"/>
+  <tile id="86" terrain="0,0,0,0"/>
+  <tile id="87" terrain="0,0,0,0"/>
+  <tile id="88" terrain="0,0,0,0"/>
+  <tile id="96" terrain="0,0,0,0"/>
+  <tile id="97" terrain="0,0,0,0"/>
+  <tile id="98" terrain="0,0,0,0"/>
+  <tile id="99" terrain="0,0,0,0"/>
+  <tile id="100" terrain="0,0,0,0"/>
+  <tile id="101" terrain="0,0,0,0"/>
+  <tile id="102" terrain="0,0,0,0"/>
+  <tile id="103" terrain="0,0,0,0"/>
+  <tile id="104" terrain="0,0,0,0"/>
+  <tile id="105" terrain="0,0,0,0"/>
+  <tile id="106" terrain="0,0,0,0"/>
+  <tile id="109" terrain="0,0,0,0"/>
+  <tile id="110" terrain="0,0,0,0"/>
+  <tile id="111" terrain="0,0,0,0"/>
+  <tile id="112" terrain="0,0,0,0"/>
+  <tile id="113" terrain="0,0,0,0"/>
+  <tile id="114" terrain="0,0,0,0"/>
+  <tile id="115" terrain="0,0,0,0"/>
+  <tile id="116" terrain="0,0,0,0"/>
+  <tile id="117" terrain="0,0,0,0"/>
+  <tile id="118" terrain="0,0,0,0"/>
+  <tile id="119" terrain="0,0,0,0"/>
+  <tile id="120" terrain="0,0,0,0"/>
+  <tile id="132" terrain="0,0,0,0"/>
+  <tile id="133" terrain="0,0,0,0"/>
+  <tile id="134" terrain="0,0,0,0"/>
+  <tile id="135" terrain="0,0,0,0"/>
+  <tile id="136" terrain="0,0,0,0"/>
+  <tile id="137" terrain="0,0,0,0"/>
+  <tile id="138" terrain="0,0,0,0"/>
+  <tile id="141" terrain="0,0,0,0"/>
+  <tile id="142" terrain="0,0,0,0"/>
+  <tile id="143" terrain="0,0,0,0"/>
+  <tile id="144" terrain="0,0,0,0"/>
+  <tile id="145" terrain="0,0,0,0"/>
+  <tile id="146" terrain="0,0,0,0"/>
+  <tile id="147" terrain="0,0,0,0"/>
+  <tile id="148" terrain="0,0,0,0"/>
+  <tile id="149" terrain="0,0,0,0"/>
+  <tile id="150" terrain="0,0,0,0"/>
  </tileset>
  <layer name="Tile Layer 1" width="40" height="30">
   <data encoding="base64" compression="zlib">
    eJzt1ksKwjAUQNFszb+CCi7Bf23ViSB2AYp/cOhuvaCBUOIkJDXIu3BIaKA8MmmVkiRJkmJsLf7aPXK6CqqoFda68lMXPQe6IbYYYfdZx5h4mm+JlYOykvlkPplP5gvVFTcHZdRAEy08C/s2Opbneq87YICjsT6w8TDfFDPMkRv7BAukyCxnifGOkN/fvXrfic0JZ1y+nPcj9+v/OxHWC8jn4yM=
   </data>
  </layer>
- <layer name="Tile Layer 2" width="40" height="30">
+ <layer name="Tile Layer 2" width="40" height="30" visible="0">
   <data encoding="base64" compression="zlib">
    eJzt1kkKgDAQRNHc/xbO8x3VRUMhIiYhnVpUwV/7cA5B0zRNY9yW0X51FPatiZmxtG9JCI2lfXNkaPTwTRGh0dM3/giNnj47/vARGmv4zNG/hMaaPvN0EBoZfOZqH0Ym321rwMjmYz5/zPcf8/PL/P5j/36wf3/Z/1/Yfbq+eTsB38Tp2g==
   </data>
