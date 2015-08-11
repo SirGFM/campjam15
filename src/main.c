@@ -108,11 +108,7 @@ int main(int argc, char *argv[]) {
     // Initialize the library
     rv = gfm_getNew(&(game.pCtx));
     ASSERT_NR(rv == GFMRV_OK);
-    rv = gfm_init(game.pCtx);
-    ASSERT_NR(rv == GFMRV_OK);
-    
-    // Set the game's title
-    rv = gfm_setTitleStatic(game.pCtx, "com.gfmgamecorner", "DinoPanic");
+    rv = gfm_initStatic(game.pCtx, "com.gfmgamecorner", "DinoPanic");
     ASSERT_NR(rv == GFMRV_OK);
     
     // Initialize the window (last param is whether the user can resize the wnd)
