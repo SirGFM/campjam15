@@ -327,7 +327,8 @@ gfmRV doc_draw(doc *pDoc, gameCtx *pGame) {
     x = width - 24;
     y = 48;
     while (i > 0) {
-        rv = gfm_drawTile(pGame->pCtx, pGame->pSset32x32, x, y, 25);
+        rv = gfm_drawTile(pGame->pCtx, pGame->pSset32x32, x, y, 25,
+                0/*isFlipped*/);
         i--;
         x -= 24;
     }

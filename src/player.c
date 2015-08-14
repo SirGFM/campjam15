@@ -430,7 +430,8 @@ gfmRV player_draw(player *pPl, gameCtx *pGame) {
     x = 0;
     y = 48;
     while (i > 0) {
-        rv = gfm_drawTile(pGame->pCtx, pGame->pSset32x32, x, y, 24);
+        rv = gfm_drawTile(pGame->pCtx, pGame->pSset32x32, x, y, 24,
+                0/*isFlipped*/);
         i--;
         x += 22;
     }
