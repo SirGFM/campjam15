@@ -119,30 +119,33 @@ int main(int argc, char *argv[]) {
     rv = gfm_setBackground(game.pCtx, 0xff222034);
     ASSERT_NR(rv == GFMRV_OK);
     
+    // Parse all parameters
+    if (argc > 1) {
+        int n;
+        
+        n = argc - 1;
+        while (n > 0) {
+            if (strcmp(argv[n], "full") == 0) {
+                rv = gfm_setFullscreen(game.pCtx);
+                ASSERT_NR(rv == GFMRV_OK);
+            }
+            else if (strcmp(argv[n], "skip") == 0) {
+                jumpIntro = 1;
+            }
+            else if (strcmp(argv[n], "noaudio") == 0) {
+                rv = gfm_disableAudio(game.pCtx);
+                ASSERT_NR(rv == GFMRV_OK);
+            }
+            
+            n--;
+        }
+    }
+    
     // Initialize the audio sub-system
 #ifndef DEBUG
     rv = gfm_initAudio(game.pCtx, gfmAudio_defQuality);
     ASSERT_NR(rv == GFMRV_OK);
 #endif
-    
-    if (argc > 1) {
-        if (strcmp(argv[1], "full") == 0) {
-            rv = gfm_setFullscreen(game.pCtx);
-            ASSERT_NR(rv == GFMRV_OK);
-        }
-        else if (strcmp(argv[1], "skip") == 0) {
-            jumpIntro = 1;
-        }
-    }
-    if (argc > 2) {
-        if (strcmp(argv[2], "full") == 0) {
-            rv = gfm_setFullscreen(game.pCtx);
-            ASSERT_NR(rv == GFMRV_OK);
-        }
-        else if (strcmp(argv[2], "skip") == 0) {
-            jumpIntro = 1;
-        }
-    }
     
     // Load all assets
     // TODO push this into another thread and play an animation
