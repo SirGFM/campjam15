@@ -21,10 +21,8 @@ gfmRV collideObjectWorld(gfmObject *pObj, gfmObject *pWorld) {
     gfmRV rv;
     
     // Collide it horizontally and vertically
-    rv = gfmObject_separateHorizontal(pObj, pWorld);
-    ASSERT_NR(rv == GFMRV_OK || rv == GFMRV_COLLISION_NOT_TRIGGERED);
-    rv = gfmObject_separateVertical(pObj, pWorld);
-    ASSERT_NR(rv == GFMRV_OK || rv == GFMRV_COLLISION_NOT_TRIGGERED);
+    rv = gfmObject_collide(pObj, pWorld);
+    ASSERT_NR(rv == GFMRV_TRUE || rv == GFMRV_FALSE);
     
     rv = GFMRV_OK;
 __ret:
